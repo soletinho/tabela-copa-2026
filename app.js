@@ -32,6 +32,81 @@ const groupStageRounds = [
   ["2", "3"],
 ];
 
+const kickoffTimes = {
+  "A-1": "2026-06-11T16:00",
+  "A-2": "2026-06-11T23:00",
+  "A-3": "2026-06-18T22:00",
+  "A-4": "2026-06-18T13:00",
+  "A-5": "2026-06-24T22:00",
+  "A-6": "2026-06-24T22:00",
+  "B-1": "2026-06-12T19:00",
+  "B-2": "2026-06-13T16:00",
+  "B-3": "2026-06-18T19:00",
+  "B-4": "2026-06-18T16:00",
+  "B-5": "2026-06-24T16:00",
+  "B-6": "2026-06-24T16:00",
+  "C-1": "2026-06-13T19:00",
+  "C-2": "2026-06-13T22:00",
+  "C-3": "2026-06-19T21:30",
+  "C-4": "2026-06-19T19:00",
+  "C-5": "2026-06-24T19:00",
+  "C-6": "2026-06-24T19:00",
+  "D-1": "2026-06-12T22:00",
+  "D-2": "2026-06-14T01:00",
+  "D-3": "2026-06-19T16:00",
+  "D-4": "2026-06-20T00:00",
+  "D-5": "2026-06-25T23:00",
+  "D-6": "2026-06-25T23:00",
+  "E-1": "2026-06-14T14:00",
+  "E-2": "2026-06-14T20:00",
+  "E-3": "2026-06-20T17:00",
+  "E-4": "2026-06-20T21:00",
+  "E-5": "2026-06-25T17:00",
+  "E-6": "2026-06-25T17:00",
+  "F-1": "2026-06-14T17:00",
+  "F-2": "2026-06-14T23:00",
+  "F-3": "2026-06-20T14:00",
+  "F-4": "2026-06-21T01:00",
+  "F-5": "2026-06-25T20:00",
+  "F-6": "2026-06-25T20:00",
+  "G-1": "2026-06-15T16:00",
+  "G-2": "2026-06-15T22:00",
+  "G-3": "2026-06-21T16:00",
+  "G-4": "2026-06-21T22:00",
+  "G-5": "2026-06-27T00:00",
+  "G-6": "2026-06-27T00:00",
+  "H-1": "2026-06-15T13:00",
+  "H-2": "2026-06-15T19:00",
+  "H-3": "2026-06-21T13:00",
+  "H-4": "2026-06-21T19:00",
+  "H-5": "2026-06-26T21:00",
+  "H-6": "2026-06-26T21:00",
+  "I-1": "2026-06-16T16:00",
+  "I-2": "2026-06-16T19:00",
+  "I-3": "2026-06-22T18:00",
+  "I-4": "2026-06-22T21:00",
+  "I-5": "2026-06-26T16:00",
+  "I-6": "2026-06-26T16:00",
+  "J-1": "2026-06-16T22:00",
+  "J-2": "2026-06-17T01:00",
+  "J-3": "2026-06-22T14:00",
+  "J-4": "2026-06-23T00:00",
+  "J-5": "2026-06-27T23:00",
+  "J-6": "2026-06-27T23:00",
+  "K-1": "2026-06-17T14:00",
+  "K-2": "2026-06-17T23:00",
+  "K-3": "2026-06-23T14:00",
+  "K-4": "2026-06-23T23:00",
+  "K-5": "2026-06-27T20:30",
+  "K-6": "2026-06-27T20:30",
+  "L-1": "2026-06-17T17:00",
+  "L-2": "2026-06-17T20:00",
+  "L-3": "2026-06-23T17:00",
+  "L-4": "2026-06-23T20:00",
+  "L-5": "2026-06-27T18:00",
+  "L-6": "2026-06-27T18:00",
+};
+
 function createDefaultState() {
   return {
     groups: initialGroups,
@@ -42,6 +117,7 @@ function createDefaultState() {
         round: Math.floor(index / 2) + 1,
         homeId: `${group.id}${homeSeed}`,
         awayId: `${group.id}${awaySeed}`,
+        scheduledAt: kickoffTimes[`${group.id}-${index + 1}`],
         homeGoals: "",
         awayGoals: "",
       })),
@@ -85,6 +161,10 @@ function migrateState(savedState) {
         : team;
     }),
   }));
+  nextState.matches = nextState.matches.map((match) => ({
+    ...match,
+    scheduledAt: match.scheduledAt || kickoffTimes[match.id],
+  }));
 
   return nextState;
 }
@@ -109,6 +189,13 @@ function toNumber(value) {
   if (value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function formatKickoff(value) {
+  if (!value) return "Data a definir";
+  const [date, time] = value.split("T");
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year}, ${time} BRT`;
 }
 
 function getStandings(groupId) {
@@ -257,7 +344,10 @@ function createMatch(match) {
     <div class="versus">x</div>
     <input type="number" min="0" inputmode="numeric" value="${match.awayGoals}" aria-label="Gols ${away.name}">
     <div class="match-team">${away.name}</div>
-    <div class="match-meta">Grupo ${match.groupId} - rodada ${match.round}</div>
+    <div class="match-meta">
+      <span>Grupo ${match.groupId} - rodada ${match.round}</span>
+      <strong>${formatKickoff(match.scheduledAt)}</strong>
+    </div>
   `;
 
   const [homeInput, awayInput] = div.querySelectorAll("input");
@@ -300,7 +390,9 @@ function render() {
   visibleGroups.forEach((group) => {
     const node = template.content.cloneNode(true);
     const card = node.querySelector(".group-card");
-    const matches = state.matches.filter((match) => match.groupId === group.id && matchesFilter(match));
+    const matches = state.matches
+      .filter((match) => match.groupId === group.id && matchesFilter(match))
+      .sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
 
     card.querySelector("h2").textContent = `Grupo ${group.id}`;
     card.querySelector(".group-heading span").textContent = `${matches.length} jogos visiveis`;

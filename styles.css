@@ -299,9 +299,19 @@ tr.third-qualified td {
 }
 
 .match-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   grid-column: 1 / -1;
   color: var(--muted);
   font-size: 0.82rem;
+}
+
+.match-meta strong {
+  color: var(--primary);
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .third-places {
@@ -359,5 +369,10 @@ tr.third-qualified td {
 
   .match-team {
     font-size: 0.9rem;
+  }
+
+  .match-meta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
