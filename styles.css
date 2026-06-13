@@ -50,6 +50,11 @@ select {
   text-transform: uppercase;
 }
 
+.header-copy {
+  display: grid;
+  gap: 12px;
+}
+
 h1,
 h2,
 p {
@@ -57,16 +62,25 @@ p {
 }
 
 h1 {
-  margin-bottom: 8px;
+  margin-bottom: 0;
   font-size: clamp(2rem, 4vw, 3.8rem);
   line-height: 1;
 }
 
-.subtitle {
-  max-width: 720px;
-  margin-bottom: 0;
-  color: rgba(255, 255, 255, 0.84);
-  font-size: 1.05rem;
+.header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.header-badges span {
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.86rem;
+  font-weight: 800;
 }
 
 .header-actions {
