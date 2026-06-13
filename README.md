@@ -33,7 +33,7 @@ Quando um jogo recebe status final (`FT`, `AET` ou `PEN`), o resultado fica salv
 
 ### Variáveis opcionais
 
-Se a API-Football usar outro ID para a competição, configure em **Settings > Secrets and variables > Actions > Variables**:
+Por padrão, a automação busca fixtures por data em todas as competições. Se você quiser restringir a busca a uma competição específica da API-Football, configure em **Settings > Secrets and variables > Actions > Variables**:
 
-- `API_FOOTBALL_LEAGUE_ID`: padrão `1`.
+- `API_FOOTBALL_LEAGUE_ID`: ID da competição na API-Football.
 - `API_FOOTBALL_SEASON`: padrão `2026`.

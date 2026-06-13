@@ -5,7 +5,7 @@ const FINAL_STATUSES = new Set(["FT", "AET", "PEN"]);
 const CHECK_AFTER_MINUTES = 135;
 
 const apiKey = process.env.API_FOOTBALL_KEY;
-const leagueId = process.env.API_FOOTBALL_LEAGUE_ID || "1";
+const leagueId = process.env.API_FOOTBALL_LEAGUE_ID || "";
 const season = process.env.API_FOOTBALL_SEASON || "2026";
 const now = process.env.RESULTS_NOW ? new Date(process.env.RESULTS_NOW) : new Date();
 
@@ -36,23 +36,7 @@ if (!dueMatches.length) {
 }
 
 console.log(`Checking ${dueMatches.length} due match(es) against API-Football.`);
-
-const url = new URL(API_URL);
-url.searchParams.set("league", leagueId);
-url.searchParams.set("season", season);
-
-const response = await fetch(url, {
-  headers: {
-    "x-apisports-key": apiKey,
-  },
-});
-
-if (!response.ok) {
-  throw new Error(`API-Football request failed with HTTP ${response.status}`);
-}
-
-const payload = await response.json();
-const fixtures = payload.response || [];
+const fixtures = await fetchFixturesForDueDates(dueMatches);
 let changed = false;
 
 for (const match of dueMatches) {
@@ -109,6 +93,46 @@ async function readJson(path, fallback = undefined) {
     if (fallback !== undefined) return fallback;
     throw error;
   }
+}
+
+async function fetchFixturesForDueDates(matches) {
+  const dates = [...new Set(matches.map((match) => match.scheduledAtBrt.slice(0, 10)))];
+  const fixtures = [];
+
+  for (const date of dates) {
+    const dateFixtures = await fetchFixtures({ date });
+    fixtures.push(...dateFixtures);
+  }
+
+  return fixtures;
+}
+
+async function fetchFixtures({ date }) {
+  const url = new URL(API_URL);
+  url.searchParams.set("date", date);
+  url.searchParams.set("timezone", "America/Sao_Paulo");
+
+  if (leagueId) {
+    url.searchParams.set("league", leagueId);
+    url.searchParams.set("season", season);
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      "x-apisports-key": apiKey,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API-Football request for ${date} failed with HTTP ${response.status}`);
+  }
+
+  const payload = await response.json();
+  const fixtures = payload.response || [];
+  const scope = leagueId ? `league ${leagueId}, season ${season}` : "all competitions";
+  console.log(`API returned ${fixtures.length} fixture(s) for ${date} (${scope}).`);
+
+  return fixtures;
 }
 
 function findFixture(fixtures, match) {
