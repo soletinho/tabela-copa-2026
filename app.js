@@ -108,6 +108,65 @@ const kickoffTimes = {
   "L-6": "2026-06-27T18:00",
 };
 
+const roundOf32Matches = [
+  { id: 73, home: { type: "runnerUp", group: "A" }, away: { type: "runnerUp", group: "B" } },
+  { id: 74, home: { type: "winner", group: "E" }, away: { type: "third", groups: ["A", "B", "C", "D", "F"] } },
+  { id: 75, home: { type: "winner", group: "F" }, away: { type: "runnerUp", group: "C" } },
+  { id: 76, home: { type: "winner", group: "C" }, away: { type: "runnerUp", group: "F" } },
+  { id: 77, home: { type: "winner", group: "I" }, away: { type: "third", groups: ["C", "D", "F", "G", "H"] } },
+  { id: 78, home: { type: "runnerUp", group: "E" }, away: { type: "runnerUp", group: "I" } },
+  { id: 79, home: { type: "winner", group: "A" }, away: { type: "third", groups: ["C", "E", "F", "H", "I"] } },
+  { id: 80, home: { type: "winner", group: "L" }, away: { type: "third", groups: ["E", "H", "I", "J", "K"] } },
+  { id: 81, home: { type: "winner", group: "D" }, away: { type: "third", groups: ["B", "E", "F", "I", "J"] } },
+  { id: 82, home: { type: "winner", group: "G" }, away: { type: "third", groups: ["A", "E", "H", "I", "J"] } },
+  { id: 83, home: { type: "runnerUp", group: "K" }, away: { type: "runnerUp", group: "L" } },
+  { id: 84, home: { type: "winner", group: "H" }, away: { type: "runnerUp", group: "J" } },
+  { id: 85, home: { type: "winner", group: "B" }, away: { type: "third", groups: ["E", "F", "G", "I", "J"] } },
+  { id: 86, home: { type: "winner", group: "J" }, away: { type: "runnerUp", group: "H" } },
+  { id: 87, home: { type: "winner", group: "K" }, away: { type: "third", groups: ["D", "E", "I", "J", "L"] } },
+  { id: 88, home: { type: "runnerUp", group: "D" }, away: { type: "runnerUp", group: "G" } },
+];
+
+const knockoutRounds = [
+  {
+    title: "Rodada de 32",
+    matches: roundOf32Matches,
+  },
+  {
+    title: "Oitavas",
+    matches: [
+      { id: 89, home: { type: "matchWinner", match: 73 }, away: { type: "matchWinner", match: 75 } },
+      { id: 90, home: { type: "matchWinner", match: 74 }, away: { type: "matchWinner", match: 77 } },
+      { id: 91, home: { type: "matchWinner", match: 76 }, away: { type: "matchWinner", match: 78 } },
+      { id: 92, home: { type: "matchWinner", match: 79 }, away: { type: "matchWinner", match: 80 } },
+      { id: 93, home: { type: "matchWinner", match: 83 }, away: { type: "matchWinner", match: 84 } },
+      { id: 94, home: { type: "matchWinner", match: 81 }, away: { type: "matchWinner", match: 82 } },
+      { id: 95, home: { type: "matchWinner", match: 86 }, away: { type: "matchWinner", match: 88 } },
+      { id: 96, home: { type: "matchWinner", match: 85 }, away: { type: "matchWinner", match: 87 } },
+    ],
+  },
+  {
+    title: "Quartas",
+    matches: [
+      { id: 97, home: { type: "matchWinner", match: 89 }, away: { type: "matchWinner", match: 90 } },
+      { id: 98, home: { type: "matchWinner", match: 93 }, away: { type: "matchWinner", match: 94 } },
+      { id: 99, home: { type: "matchWinner", match: 91 }, away: { type: "matchWinner", match: 92 } },
+      { id: 100, home: { type: "matchWinner", match: 95 }, away: { type: "matchWinner", match: 96 } },
+    ],
+  },
+  {
+    title: "Semifinais",
+    matches: [
+      { id: 101, home: { type: "matchWinner", match: 97 }, away: { type: "matchWinner", match: 98 } },
+      { id: 102, home: { type: "matchWinner", match: 99 }, away: { type: "matchWinner", match: 100 } },
+    ],
+  },
+  {
+    title: "Final",
+    matches: [{ id: 104, home: { type: "matchWinner", match: 101 }, away: { type: "matchWinner", match: 102 } }],
+  },
+];
+
 function createDefaultState() {
   return {
     groups: initialGroups,
@@ -301,6 +360,99 @@ function getThirdPlaceRanking() {
     .sort(compareRows);
 }
 
+function getQualificationSnapshot() {
+  const groups = new Map();
+  const thirdRanking = getThirdPlaceRanking();
+  const qualifiedThirdIds = new Set(thirdRanking.slice(0, 8).map((row) => row.id));
+
+  state.groups.forEach((group) => {
+    const standings = getStandings(group.id);
+    groups.set(group.id, {
+      winner: standings[0],
+      runnerUp: standings[1],
+      third: standings[2],
+      thirdQualified: standings[2] ? qualifiedThirdIds.has(standings[2].id) : false,
+    });
+  });
+
+  return {
+    groups,
+    thirdRanking,
+    qualifiedThirdIds,
+  };
+}
+
+function getQualifiedTeams(snapshot = getQualificationSnapshot()) {
+  const teams = [];
+
+  state.groups.forEach((group) => {
+    const groupSnapshot = snapshot.groups.get(group.id);
+    if (!groupSnapshot) return;
+    teams.push({ ...groupSnapshot.winner, qualificationLabel: `1º ${group.id}` });
+    teams.push({ ...groupSnapshot.runnerUp, qualificationLabel: `2º ${group.id}` });
+    if (groupSnapshot.thirdQualified) {
+      teams.push({ ...groupSnapshot.third, qualificationLabel: `3º ${group.id}` });
+    }
+  });
+
+  return teams;
+}
+
+function resolveSeed(seed, snapshot) {
+  if (seed.type === "winner") {
+    const team = snapshot.groups.get(seed.group)?.winner;
+    return {
+      label: team?.name || `1º Grupo ${seed.group}`,
+      meta: `1º Grupo ${seed.group}`,
+      resolved: Boolean(team),
+    };
+  }
+
+  if (seed.type === "runnerUp") {
+    const team = snapshot.groups.get(seed.group)?.runnerUp;
+    return {
+      label: team?.name || `2º Grupo ${seed.group}`,
+      meta: `2º Grupo ${seed.group}`,
+      resolved: Boolean(team),
+    };
+  }
+
+  if (seed.type === "third") {
+    const candidates = seed.groups
+      .map((groupId) => snapshot.groups.get(groupId))
+      .filter((group) => group?.thirdQualified)
+      .map((group) => group.third);
+
+    if (candidates.length === 1) {
+      return {
+        label: candidates[0].name,
+        meta: `3º Grupo ${candidates[0].groupId}`,
+        resolved: true,
+      };
+    }
+
+    return {
+      label: `3º de ${seed.groups.join("/")}`,
+      meta: candidates.length ? `${candidates.length} opções qualificadas` : "melhor terceiro",
+      resolved: false,
+    };
+  }
+
+  if (seed.type === "matchWinner") {
+    return {
+      label: `Vencedor Jogo ${seed.match}`,
+      meta: "mata-mata",
+      resolved: false,
+    };
+  }
+
+  return {
+    label: "A definir",
+    meta: "",
+    resolved: false,
+  };
+}
+
 function createStandingsTable(groupId) {
   const table = document.createElement("table");
   const standings = getStandings(groupId);
@@ -453,6 +605,7 @@ function render() {
   }
 
   renderThirdPlaces();
+  renderKnockout();
   renderSummary();
 }
 
@@ -496,6 +649,55 @@ function renderSummary() {
       })
     : "0,00";
   document.querySelector("#qualifiedCount").textContent = 32;
+}
+
+function renderKnockout() {
+  const strip = document.querySelector("#qualifiedStrip");
+  const bracket = document.querySelector("#knockoutBracket");
+  if (!strip || !bracket) return;
+
+  const snapshot = getQualificationSnapshot();
+  const qualifiedTeams = getQualifiedTeams(snapshot);
+
+  strip.innerHTML = "";
+  bracket.innerHTML = "";
+
+  qualifiedTeams.forEach((team) => {
+    const badge = document.createElement("span");
+    badge.className = "qualified-team";
+    badge.innerHTML = `<strong>${team.qualificationLabel}</strong>${team.name}`;
+    strip.append(badge);
+  });
+
+  knockoutRounds.forEach((round) => {
+    const column = document.createElement("article");
+    column.className = "bracket-round";
+    column.innerHTML = `<h3>${round.title}</h3>`;
+
+    round.matches.forEach((match) => {
+      const home = resolveSeed(match.home, snapshot);
+      const away = resolveSeed(match.away, snapshot);
+      const card = document.createElement("div");
+      card.className = "bracket-match";
+      card.innerHTML = `
+        <div class="match-number">Jogo ${match.id}</div>
+        ${createBracketTeam(home)}
+        ${createBracketTeam(away)}
+      `;
+      column.append(card);
+    });
+
+    bracket.append(column);
+  });
+}
+
+function createBracketTeam(seed) {
+  return `
+    <div class="bracket-team ${seed.resolved ? "resolved" : ""}">
+      <span>${seed.label}</span>
+      <small>${seed.meta}</small>
+    </div>
+  `;
 }
 
 function populateGroupFilter() {
