@@ -101,18 +101,25 @@ async function fetchFixturesForDueDates(matches) {
 
   for (const date of dates) {
     const dateFixtures = await fetchFixtures({ date });
-    fixtures.push(...dateFixtures);
+    if (dateFixtures.length || !leagueId) {
+      fixtures.push(...dateFixtures);
+      continue;
+    }
+
+    console.log(`No fixtures found for ${date} with league ${leagueId}. Retrying all competitions.`);
+    const fallbackFixtures = await fetchFixtures({ date, ignoreLeague: true });
+    fixtures.push(...fallbackFixtures);
   }
 
   return fixtures;
 }
 
-async function fetchFixtures({ date }) {
+async function fetchFixtures({ date, ignoreLeague = false }) {
   const url = new URL(API_URL);
   url.searchParams.set("date", date);
   url.searchParams.set("timezone", "America/Sao_Paulo");
 
-  if (leagueId) {
+  if (leagueId && !ignoreLeague) {
     url.searchParams.set("league", leagueId);
     url.searchParams.set("season", season);
   }
@@ -129,7 +136,7 @@ async function fetchFixtures({ date }) {
 
   const payload = await response.json();
   const fixtures = payload.response || [];
-  const scope = leagueId ? `league ${leagueId}, season ${season}` : "all competitions";
+  const scope = leagueId && !ignoreLeague ? `league ${leagueId}, season ${season}` : "all competitions";
   console.log(`API returned ${fixtures.length} fixture(s) for ${date} (${scope}).`);
 
   return fixtures;
