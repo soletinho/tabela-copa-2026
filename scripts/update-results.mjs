@@ -20,6 +20,13 @@ const results = await readJson("data/results.json", {
   updatedAt: null,
   matches: {},
 });
+const manualResults = await readJson("data/manual-results.json", {
+  source: "manual",
+  updatedAt: null,
+  matches: {},
+});
+
+let changed = applyManualResults(results, manualResults);
 
 const dueMatches = schedule.matches.filter((match) => {
   const cached = results.matches?.[match.id];
@@ -37,7 +44,6 @@ if (!dueMatches.length) {
 
 console.log(`Checking ${dueMatches.length} due match(es) against API-Football.`);
 const fixtures = await fetchFixturesForDueDates(dueMatches);
-let changed = false;
 
 for (const match of dueMatches) {
   const fixtureMatch = findFixture(fixtures, match);
@@ -93,6 +99,24 @@ async function readJson(path, fallback = undefined) {
     if (fallback !== undefined) return fallback;
     throw error;
   }
+}
+
+function applyManualResults(results, manualResults) {
+  let changed = false;
+
+  for (const [matchId, result] of Object.entries(manualResults.matches || {})) {
+    const previous = results.matches[matchId];
+    if (previous?.final) continue;
+
+    results.matches[matchId] = {
+      ...result,
+      source: "manual",
+    };
+    changed = true;
+    console.log(`Applied manual final result for ${matchId}.`);
+  }
+
+  return changed;
 }
 
 async function fetchFixturesForDueDates(matches) {
