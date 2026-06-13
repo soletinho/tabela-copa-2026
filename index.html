@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tabela Interativa - Copa do Mundo 2026</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Copa do Mundo 2026</p>
+        <h1>Tabela interativa</h1>
+        <p class="subtitle">
+          Preencha os placares, acompanhe a classificacao dos grupos e veja os
+          melhores terceiros colocados.
+        </p>
+      </div>
+      <div class="header-actions">
+        <button id="saveButton" type="button">Salvar</button>
+        <button id="resetButton" type="button" class="ghost">Limpar placares</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="toolbar" aria-label="Filtros">
+        <label>
+          Grupo
+          <select id="groupFilter">
+            <option value="all">Todos os grupos</option>
+          </select>
+        </label>
+        <label>
+          Buscar selecao
+          <input id="teamSearch" type="search" placeholder="Ex.: Brasil" />
+        </label>
+        <label class="toggle">
+          <input id="showOnlyPlayed" type="checkbox" />
+          Somente jogos com placar
+        </label>
+      </section>
+
+      <section class="summary-grid" aria-label="Resumo">
+        <article>
+          <span id="playedMatches">0</span>
+          <p>jogos preenchidos</p>
+        </article>
+        <article>
+          <span id="totalGoals">0</span>
+          <p>gols marcados</p>
+        </article>
+        <article>
+          <span id="averageGoals">0,00</span>
+          <p>media de gols</p>
+        </article>
+        <article>
+          <span id="qualifiedCount">0</span>
+          <p>classificados destacados</p>
+        </article>
+      </section>
+
+      <section id="groups" class="groups" aria-live="polite"></section>
+
+      <section class="third-places">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Ranking extra</p>
+            <h2>Melhores terceiros colocados</h2>
+          </div>
+          <p>Os 8 melhores tambem passam para a fase eliminatoria.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Grupo</th>
+                <th>Selecao</th>
+                <th>Pts</th>
+                <th>J</th>
+                <th>V</th>
+                <th>E</th>
+                <th>D</th>
+                <th>GP</th>
+                <th>GC</th>
+                <th>SG</th>
+              </tr>
+            </thead>
+            <tbody id="thirdPlaces"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <template id="groupTemplate">
+      <article class="group-card">
+        <div class="group-heading">
+          <h2></h2>
+          <span></span>
+        </div>
+        <div class="group-content">
+          <div class="table-wrap standings-wrap"></div>
+          <div class="matches"></div>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
