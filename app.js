@@ -1,4 +1,5 @@
 const STORAGE_KEY = "copa-2026-tabela";
+const RESULTS_URL = "data/results.json";
 
 const groupTeams = {
   A: ["México", "África do Sul", "Coreia do Sul", "República Tcheca"],
@@ -126,6 +127,10 @@ function createDefaultState() {
 }
 
 let state = loadState();
+let remoteResults = {
+  matches: {},
+  updatedAt: null,
+};
 
 const groupsEl = document.querySelector("#groups");
 const groupFilterEl = document.querySelector("#groupFilter");
@@ -171,6 +176,32 @@ function migrateState(savedState) {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+async function loadRemoteResults() {
+  try {
+    const response = await fetch(`${RESULTS_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) return;
+
+    const data = await response.json();
+    remoteResults = data;
+    applyRemoteResults(data.matches || {});
+    render();
+  } catch {
+    // The local table keeps working even when the hosted results file is unavailable.
+  }
+}
+
+function applyRemoteResults(matches) {
+  state.matches.forEach((match) => {
+    const result = matches[match.id];
+    if (!result || !result.final) return;
+
+    match.homeGoals = String(result.homeGoals);
+    match.awayGoals = String(result.awayGoals);
+    match.status = result.status || "FT";
+    match.source = "api";
+  });
 }
 
 function getTeam(teamId) {
@@ -334,8 +365,11 @@ function createStandingsTable(groupId) {
 function createMatch(match) {
   const home = getTeam(match.homeId);
   const away = getTeam(match.awayId);
+  const apiResult = remoteResults.matches?.[match.id];
+  const statusLabel = apiResult?.final ? "Resultado oficial" : "Aguardando resultado";
   const div = document.createElement("div");
   div.className = "match";
+  if (apiResult?.final) div.classList.add("match-final");
   div.dataset.group = match.groupId;
 
   div.innerHTML = `
@@ -347,10 +381,13 @@ function createMatch(match) {
     <div class="match-meta">
       <span>Grupo ${match.groupId} - rodada ${match.round}</span>
       <strong>${formatKickoff(match.scheduledAt)}</strong>
+      <em>${statusLabel}</em>
     </div>
   `;
 
   const [homeInput, awayInput] = div.querySelectorAll("input");
+  homeInput.disabled = Boolean(apiResult?.final);
+  awayInput.disabled = Boolean(apiResult?.final);
   homeInput.addEventListener("input", () => updateScore(match.id, "homeGoals", homeInput.value));
   awayInput.addEventListener("input", () => updateScore(match.id, "awayGoals", awayInput.value));
 
@@ -491,3 +528,4 @@ document.querySelector("#resetButton").addEventListener("click", () => {
 
 populateGroupFilter();
 render();
+loadRemoteResults();

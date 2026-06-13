@@ -292,6 +292,17 @@ tr.third-qualified td {
   text-align: center;
 }
 
+.match input:disabled {
+  color: var(--text);
+  background: #edf4f1;
+  cursor: not-allowed;
+}
+
+.match-final {
+  border-color: rgba(15, 123, 108, 0.35);
+  background: #f3fbf8;
+}
+
 .versus {
   color: var(--muted);
   font-weight: 900;
@@ -312,6 +323,21 @@ tr.third-qualified td {
   color: var(--primary);
   font-weight: 900;
   white-space: nowrap;
+}
+
+.match-meta em {
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--muted);
+  background: #eef2f7;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.match-final .match-meta em {
+  color: #fff;
+  background: var(--primary);
 }
 
 .third-places {
