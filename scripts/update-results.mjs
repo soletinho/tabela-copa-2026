@@ -39,7 +39,7 @@ const dueMatches = schedule.matches.filter((match) => {
 
 if (!dueMatches.length) {
   console.log("No matches are ready for result checks.");
-  process.exit(0);
+  await finish(changed, results);
 }
 
 console.log(`Checking ${dueMatches.length} due match(es) against API-Football.`);
@@ -82,15 +82,7 @@ for (const match of dueMatches) {
   }
 }
 
-if (!changed) {
-  console.log("No result changes detected.");
-  process.exit(0);
-}
-
-results.source = "api-football";
-results.updatedAt = now.toISOString();
-await writeFile("data/results.json", `${JSON.stringify(results, null, 2)}\n`, "utf8");
-console.log("data/results.json updated.");
+await finish(changed, results);
 
 async function readJson(path, fallback = undefined) {
   try {
@@ -117,6 +109,19 @@ function applyManualResults(results, manualResults) {
   }
 
   return changed;
+}
+
+async function finish(changed, results) {
+  if (!changed) {
+    console.log("No result changes detected.");
+    process.exit(0);
+  }
+
+  results.source = "api-football";
+  results.updatedAt = now.toISOString();
+  await writeFile("data/results.json", `${JSON.stringify(results, null, 2)}\n`, "utf8");
+  console.log("data/results.json updated.");
+  process.exit(0);
 }
 
 async function fetchFixturesForDueDates(matches) {
