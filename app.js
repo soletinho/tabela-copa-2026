@@ -127,45 +127,42 @@ const roundOf32Matches = [
   { id: 88, home: { type: "runnerUp", group: "D" }, away: { type: "runnerUp", group: "G" } },
 ];
 
-const knockoutRounds = [
-  {
-    title: "Rodada de 32",
-    matches: roundOf32Matches,
-  },
-  {
-    title: "Oitavas",
-    matches: [
-      { id: 89, home: { type: "matchWinner", match: 73 }, away: { type: "matchWinner", match: 75 } },
-      { id: 90, home: { type: "matchWinner", match: 74 }, away: { type: "matchWinner", match: 77 } },
-      { id: 91, home: { type: "matchWinner", match: 76 }, away: { type: "matchWinner", match: 78 } },
-      { id: 92, home: { type: "matchWinner", match: 79 }, away: { type: "matchWinner", match: 80 } },
-      { id: 93, home: { type: "matchWinner", match: 83 }, away: { type: "matchWinner", match: 84 } },
-      { id: 94, home: { type: "matchWinner", match: 81 }, away: { type: "matchWinner", match: 82 } },
-      { id: 95, home: { type: "matchWinner", match: 86 }, away: { type: "matchWinner", match: 88 } },
-      { id: 96, home: { type: "matchWinner", match: 85 }, away: { type: "matchWinner", match: 87 } },
-    ],
-  },
-  {
-    title: "Quartas",
-    matches: [
-      { id: 97, home: { type: "matchWinner", match: 89 }, away: { type: "matchWinner", match: 90 } },
-      { id: 98, home: { type: "matchWinner", match: 93 }, away: { type: "matchWinner", match: 94 } },
-      { id: 99, home: { type: "matchWinner", match: 91 }, away: { type: "matchWinner", match: 92 } },
-      { id: 100, home: { type: "matchWinner", match: 95 }, away: { type: "matchWinner", match: 96 } },
-    ],
-  },
-  {
-    title: "Semifinais",
-    matches: [
-      { id: 101, home: { type: "matchWinner", match: 97 }, away: { type: "matchWinner", match: 98 } },
-      { id: 102, home: { type: "matchWinner", match: 99 }, away: { type: "matchWinner", match: 100 } },
-    ],
-  },
-  {
-    title: "Final",
-    matches: [{ id: 104, home: { type: "matchWinner", match: 101 }, away: { type: "matchWinner", match: 102 } }],
-  },
+const knockoutMatches = [
+  ...roundOf32Matches,
+  { id: 89, home: { type: "matchWinner", match: 74 }, away: { type: "matchWinner", match: 77 } },
+  { id: 90, home: { type: "matchWinner", match: 73 }, away: { type: "matchWinner", match: 75 } },
+  { id: 91, home: { type: "matchWinner", match: 76 }, away: { type: "matchWinner", match: 78 } },
+  { id: 92, home: { type: "matchWinner", match: 79 }, away: { type: "matchWinner", match: 80 } },
+  { id: 93, home: { type: "matchWinner", match: 83 }, away: { type: "matchWinner", match: 84 } },
+  { id: 94, home: { type: "matchWinner", match: 81 }, away: { type: "matchWinner", match: 82 } },
+  { id: 95, home: { type: "matchWinner", match: 86 }, away: { type: "matchWinner", match: 88 } },
+  { id: 96, home: { type: "matchWinner", match: 85 }, away: { type: "matchWinner", match: 87 } },
+  { id: 97, home: { type: "matchWinner", match: 89 }, away: { type: "matchWinner", match: 90 } },
+  { id: 98, home: { type: "matchWinner", match: 93 }, away: { type: "matchWinner", match: 94 } },
+  { id: 99, home: { type: "matchWinner", match: 91 }, away: { type: "matchWinner", match: 92 } },
+  { id: 100, home: { type: "matchWinner", match: 95 }, away: { type: "matchWinner", match: 96 } },
+  { id: 101, home: { type: "matchWinner", match: 97 }, away: { type: "matchWinner", match: 98 } },
+  { id: 102, home: { type: "matchWinner", match: 99 }, away: { type: "matchWinner", match: 100 } },
+  { id: 103, home: { type: "matchLoser", match: 101 }, away: { type: "matchLoser", match: 102 } },
+  { id: 104, home: { type: "matchWinner", match: 101 }, away: { type: "matchWinner", match: 102 } },
 ];
+
+const knockoutMatchById = new Map(knockoutMatches.map((match) => [match.id, match]));
+
+const bracketLayout = {
+  left: [
+    { title: "R32", matches: [74, 77, 73, 75, 83, 84, 81, 82] },
+    { title: "R16", matches: [89, 90, 93, 94] },
+    { title: "QF", matches: [97, 98] },
+    { title: "SF", matches: [101] },
+  ],
+  right: [
+    { title: "SF", matches: [102] },
+    { title: "QF", matches: [99, 100] },
+    { title: "R16", matches: [91, 92, 95, 96] },
+    { title: "R32", matches: [76, 78, 79, 80, 86, 88, 85, 87] },
+  ],
+};
 
 function createDefaultState() {
   return {
@@ -446,6 +443,14 @@ function resolveSeed(seed, snapshot) {
     };
   }
 
+  if (seed.type === "matchLoser") {
+    return {
+      label: `Perdedor Jogo ${seed.match}`,
+      meta: "disputa 3º lugar",
+      resolved: false,
+    };
+  }
+
   return {
     label: "A definir",
     meta: "",
@@ -669,26 +674,58 @@ function renderKnockout() {
     strip.append(badge);
   });
 
-  knockoutRounds.forEach((round) => {
-    const column = document.createElement("article");
-    column.className = "bracket-round";
-    column.innerHTML = `<h3>${round.title}</h3>`;
+  bracket.append(createBracketSide("left", snapshot));
+  bracket.append(createBracketCenter(snapshot));
+  bracket.append(createBracketSide("right", snapshot));
+}
 
-    round.matches.forEach((match) => {
-      const home = resolveSeed(match.home, snapshot);
-      const away = resolveSeed(match.away, snapshot);
-      const card = document.createElement("div");
-      card.className = "bracket-match";
-      card.innerHTML = `
-        <div class="match-number">Jogo ${match.id}</div>
-        ${createBracketTeam(home)}
-        ${createBracketTeam(away)}
-      `;
-      column.append(card);
+function createBracketSide(side, snapshot) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `bracket-side bracket-side-${side}`;
+
+  bracketLayout[side].forEach((round) => {
+    const column = document.createElement("article");
+    column.className = `bracket-round bracket-round-${round.title.toLowerCase()}`;
+    column.innerHTML = `<h3>${round.title}</h3><div class="bracket-matches"></div>`;
+    const matchesEl = column.querySelector(".bracket-matches");
+
+    round.matches.forEach((matchId) => {
+      matchesEl.append(createBracketMatch(matchId, snapshot));
     });
 
-    bracket.append(column);
+    wrapper.append(column);
   });
+
+  return wrapper;
+}
+
+function createBracketCenter(snapshot) {
+  const center = document.createElement("div");
+  center.className = "bracket-center";
+  center.innerHTML = `
+    <div class="trophy-mark" aria-hidden="true">2026</div>
+    <div class="center-stack"></div>
+  `;
+
+  const stack = center.querySelector(".center-stack");
+  stack.append(createBracketMatch(104, snapshot, "final-match"));
+  stack.append(createBracketMatch(103, snapshot, "bronze-match"));
+
+  return center;
+}
+
+function createBracketMatch(matchId, snapshot, extraClass = "") {
+  const match = knockoutMatchById.get(matchId);
+  const home = resolveSeed(match.home, snapshot);
+  const away = resolveSeed(match.away, snapshot);
+  const card = document.createElement("div");
+  card.className = `bracket-match ${extraClass}`.trim();
+  card.innerHTML = `
+    <div class="match-number">Jogo ${match.id}</div>
+    ${createBracketTeam(home)}
+    ${createBracketTeam(away)}
+  `;
+  return card;
 }
 
 function createBracketTeam(seed) {
