@@ -340,11 +340,12 @@ function createFlag(team) {
   `;
 }
 
-function createTeamLabel(team, side = "left") {
+function createTeamLabel(team, side = "left", variant = "") {
   const flag = createFlag(team);
+  const variantClass = variant ? ` team-label-${variant}` : "";
   return side === "right"
-    ? `<span class="team-label team-label-right"><span>${team.name}</span>${flag}</span>`
-    : `<span class="team-label">${flag}<span>${team.name}</span></span>`;
+    ? `<span class="team-label team-label-right${variantClass}"><span>${team.name}</span>${flag}</span>`
+    : `<span class="team-label${variantClass}">${flag}<span>${team.name}</span></span>`;
 }
 
 function isPlayed(match) {
@@ -805,9 +806,9 @@ function renderTodayMatches() {
     card.innerHTML = `
       <div class="today-time">${formatKickoffTime(match.scheduledAt)}</div>
       <div class="today-game">
-        <div class="today-team today-team-home">${createTeamLabel(home)}</div>
+        <div class="today-team today-team-home">${createTeamLabel(home, "left", "stacked")}</div>
         <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
-        <div class="today-team today-team-away">${createTeamLabel(away, "right")}</div>
+        <div class="today-team today-team-away">${createTeamLabel(away, "left", "stacked")}</div>
       </div>
       <div class="today-meta">
         <span>Grupo ${match.groupId}</span>
