@@ -769,6 +769,10 @@ tr.third-qualified td {
     text-align: center;
   }
 
+  .match-team .team-label-right .team-flag {
+    order: -1;
+  }
+
   .match-team-away .team-label {
     justify-content: center;
   }
