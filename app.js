@@ -344,7 +344,8 @@ function createTeamLabel(team, side = "left", variant = "") {
   const flag = createFlag(team);
   const variantClass = variant ? ` team-label-${variant}` : "";
   if (variant === "stacked") {
-    return `<span class="team-label${variantClass}">${flag}<span>${team.name}</span></span>`;
+    const sideClass = side === "right" ? " team-label-right" : "";
+    return `<span class="team-label${sideClass}${variantClass}">${flag}<span>${team.name}</span></span>`;
   }
 
   return side === "right"
@@ -651,11 +652,11 @@ function createMatch(match) {
   div.dataset.group = match.groupId;
 
   div.innerHTML = `
-    <div class="match-team match-team-home">${createTeamLabel(home)}</div>
+    <div class="match-team match-team-home">${createTeamLabel(home, "left", "stacked")}</div>
     <input type="number" min="0" inputmode="numeric" value="${match.homeGoals}" aria-label="Gols ${home.name}">
     <div class="versus">x</div>
     <input type="number" min="0" inputmode="numeric" value="${match.awayGoals}" aria-label="Gols ${away.name}">
-    <div class="match-team match-team-away">${createTeamLabel(away, "right")}</div>
+    <div class="match-team match-team-away">${createTeamLabel(away, "right", "stacked")}</div>
     <div class="match-meta">
       <span>Grupo ${match.groupId} - rodada ${match.round}</span>
       <strong>${formatKickoff(match.scheduledAt)}</strong>
@@ -812,7 +813,7 @@ function renderTodayMatches() {
       <div class="today-game">
         <div class="today-team today-team-home">${createTeamLabel(home, "left", "stacked")}</div>
         <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
-        <div class="today-team today-team-away">${createTeamLabel(away, "left", "stacked")}</div>
+        <div class="today-team today-team-away">${createTeamLabel(away, "right", "stacked")}</div>
       </div>
       <div class="today-meta">
         <span>Grupo ${match.groupId}</span>

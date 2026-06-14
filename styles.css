@@ -398,6 +398,11 @@ tr.third-qualified td {
   text-align: left;
 }
 
+.team-label-right.team-label-stacked {
+  justify-items: end;
+  text-align: right;
+}
+
 .today-team-away {
   justify-self: end;
 }
@@ -762,18 +767,14 @@ tr.third-qualified td {
     font-size: 0.9rem;
   }
 
-  .match-team .team-label {
-    display: inline-grid;
+  .match-team .team-label-stacked {
     justify-items: center;
-    gap: 5px;
     text-align: center;
   }
 
-  .match-team-away .team-label {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-    justify-content: center;
+  .match-team-away .team-label-stacked {
+    justify-items: center;
+    text-align: center;
   }
 
   .team-flag {
