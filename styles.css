@@ -370,6 +370,41 @@ tr.third-qualified td {
   background: #fff;
 }
 
+.team-input,
+.team-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.team-input {
+  width: 100%;
+}
+
+.team-label {
+  max-width: 100%;
+}
+
+.team-label-right {
+  justify-content: flex-end;
+}
+
+.team-label span:not(.team-flag) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.team-flag {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 18px;
+  border: 1px solid rgba(23, 32, 51, 0.12);
+  border-radius: 3px;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(23, 32, 51, 0.12);
+}
+
 .matches {
   display: grid;
   gap: 10px;
@@ -390,8 +425,16 @@ tr.third-qualified td {
   font-weight: 800;
 }
 
-.match-team:last-child {
+.match-team .team-label {
+  display: flex;
+}
+
+.match-team-away {
   text-align: right;
+}
+
+.match-team-away .team-label {
+  justify-content: flex-end;
 }
 
 .match input {
@@ -476,6 +519,10 @@ tr.third-qualified td {
   padding: 9px 11px;
   background: #fbfdff;
   font-weight: 800;
+}
+
+.qualified-team .team-label {
+  font-weight: 900;
 }
 
 .qualified-team strong {
@@ -596,6 +643,10 @@ tr.third-qualified td {
 
 .bracket-team span {
   font-weight: 900;
+}
+
+.bracket-team .team-label {
+  display: flex;
 }
 
 .bracket-team small {

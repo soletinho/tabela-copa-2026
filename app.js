@@ -16,10 +16,62 @@ const groupTeams = {
   L: ["Inglaterra", "Croácia", "Gana", "Panamá"],
 };
 
+const teamFlags = {
+  A1: "mx",
+  A2: "za",
+  A3: "kr",
+  A4: "cz",
+  B1: "ca",
+  B2: "ba",
+  B3: "qa",
+  B4: "ch",
+  C1: "br",
+  C2: "ma",
+  C3: "ht",
+  C4: "gb-sct",
+  D1: "us",
+  D2: "py",
+  D3: "au",
+  D4: "tr",
+  E1: "de",
+  E2: "cw",
+  E3: "ci",
+  E4: "ec",
+  F1: "nl",
+  F2: "jp",
+  F3: "se",
+  F4: "tn",
+  G1: "be",
+  G2: "eg",
+  G3: "ir",
+  G4: "nz",
+  H1: "es",
+  H2: "cv",
+  H3: "sa",
+  H4: "uy",
+  I1: "fr",
+  I2: "sn",
+  I3: "iq",
+  I4: "no",
+  J1: "ar",
+  J2: "dz",
+  J3: "at",
+  J4: "jo",
+  K1: "pt",
+  K2: "cd",
+  K3: "uz",
+  K4: "co",
+  L1: "gb-eng",
+  L2: "hr",
+  L3: "gh",
+  L4: "pa",
+};
+
 const initialGroups = Object.entries(groupTeams).map(([letter, teams]) => ({
   id: letter,
   teams: teams.map((name, index) => ({
     id: `${letter}${index + 1}`,
+    flag: teamFlags[`${letter}${index + 1}`],
     name,
   })),
 }));
@@ -210,16 +262,21 @@ function migrateState(savedState) {
     ...savedState,
   };
   const officialTeams = new Map(
-    initialGroups.flatMap((group) => group.teams.map((team) => [team.id, team.name])),
+    initialGroups.flatMap((group) => group.teams.map((team) => [team.id, team])),
   );
 
   nextState.groups = nextState.groups.map((group) => ({
     ...group,
     teams: group.teams.map((team) => {
       const oldPlaceholder = /^Grupo [A-L] - Selecao [1-4]$/.test(team.name);
-      return oldPlaceholder && officialTeams.has(team.id)
-        ? { ...team, name: officialTeams.get(team.id) }
-        : team;
+      const officialTeam = officialTeams.get(team.id);
+      if (!officialTeam) return team;
+
+      return {
+        ...team,
+        flag: team.flag || officialTeam.flag,
+        name: oldPlaceholder ? officialTeam.name : team.name,
+      };
     }),
   }));
   nextState.matches = nextState.matches.map((match) => ({
@@ -265,7 +322,29 @@ function getTeam(teamId) {
     const team = group.teams.find((item) => item.id === teamId);
     if (team) return team;
   }
-  return { id: teamId, name: teamId };
+  return { id: teamId, flag: "", name: teamId };
+}
+
+function createFlag(team) {
+  if (!team.flag) return "";
+  return `
+    <img
+      class="team-flag"
+      src="https://flagcdn.com/w40/${team.flag}.png"
+      srcset="https://flagcdn.com/w80/${team.flag}.png 2x"
+      width="24"
+      height="18"
+      alt=""
+      aria-hidden="true"
+    >
+  `;
+}
+
+function createTeamLabel(team, side = "left") {
+  const flag = createFlag(team);
+  return side === "right"
+    ? `<span class="team-label team-label-right"><span>${team.name}</span>${flag}</span>`
+    : `<span class="team-label">${flag}<span>${team.name}</span></span>`;
 }
 
 function isPlayed(match) {
@@ -426,6 +505,7 @@ function resolveSeed(seed, snapshot) {
     const team = snapshot.groups.get(seed.group)?.winner;
     return {
       label: team?.name || `1º Grupo ${seed.group}`,
+      flag: team?.flag || "",
       meta: `1º Grupo ${seed.group}`,
       resolved: Boolean(team),
     };
@@ -435,6 +515,7 @@ function resolveSeed(seed, snapshot) {
     const team = snapshot.groups.get(seed.group)?.runnerUp;
     return {
       label: team?.name || `2º Grupo ${seed.group}`,
+      flag: team?.flag || "",
       meta: `2º Grupo ${seed.group}`,
       resolved: Boolean(team),
     };
@@ -449,6 +530,7 @@ function resolveSeed(seed, snapshot) {
     if (candidates.length === 1) {
       return {
         label: candidates[0].name,
+        flag: candidates[0].flag || "",
         meta: `3º Grupo ${candidates[0].groupId}`,
         resolved: true,
       };
@@ -456,6 +538,7 @@ function resolveSeed(seed, snapshot) {
 
     return {
       label: `3º de ${seed.groups.join("/")}`,
+      flag: "",
       meta: candidates.length ? `${candidates.length} opções qualificadas` : "melhor terceiro",
       resolved: false,
     };
@@ -464,6 +547,7 @@ function resolveSeed(seed, snapshot) {
   if (seed.type === "matchWinner") {
     return {
       label: `Vencedor Jogo ${seed.match}`,
+      flag: "",
       meta: "mata-mata",
       resolved: false,
     };
@@ -472,6 +556,7 @@ function resolveSeed(seed, snapshot) {
   if (seed.type === "matchLoser") {
     return {
       label: `Perdedor Jogo ${seed.match}`,
+      flag: "",
       meta: "disputa 3º lugar",
       resolved: false,
     };
@@ -479,6 +564,7 @@ function resolveSeed(seed, snapshot) {
 
   return {
     label: "A definir",
+    flag: "",
     meta: "",
     resolved: false,
   };
@@ -538,7 +624,11 @@ function createStandingsTable(groupId) {
       saveState();
       render();
     });
-    tr.children[1].append(input);
+    const teamCell = document.createElement("div");
+    teamCell.className = "team-input";
+    teamCell.innerHTML = createFlag(row);
+    teamCell.append(input);
+    tr.children[1].append(teamCell);
     tbody.append(tr);
   });
 
@@ -556,11 +646,11 @@ function createMatch(match) {
   div.dataset.group = match.groupId;
 
   div.innerHTML = `
-    <div class="match-team">${home.name}</div>
+    <div class="match-team match-team-home">${createTeamLabel(home)}</div>
     <input type="number" min="0" inputmode="numeric" value="${match.homeGoals}" aria-label="Gols ${home.name}">
     <div class="versus">x</div>
     <input type="number" min="0" inputmode="numeric" value="${match.awayGoals}" aria-label="Gols ${away.name}">
-    <div class="match-team">${away.name}</div>
+    <div class="match-team match-team-away">${createTeamLabel(away, "right")}</div>
     <div class="match-meta">
       <span>Grupo ${match.groupId} - rodada ${match.round}</span>
       <strong>${formatKickoff(match.scheduledAt)}</strong>
@@ -651,7 +741,7 @@ function renderThirdPlaces() {
     tr.innerHTML = `
       <td><span class="rank-badge ${index < 8 ? "" : "out"}">${index + 1}</span></td>
       <td>Grupo ${row.groupId}</td>
-      <td>${row.name}</td>
+      <td>${createTeamLabel(row)}</td>
       <td><strong>${row.points}</strong></td>
       <td>${row.played}</td>
       <td>${row.wins}</td>
@@ -715,9 +805,9 @@ function renderTodayMatches() {
     card.innerHTML = `
       <div class="today-time">${formatKickoffTime(match.scheduledAt)}</div>
       <div class="today-game">
-        <span>${home.name}</span>
+        ${createTeamLabel(home)}
         <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
-        <span>${away.name}</span>
+        ${createTeamLabel(away, "right")}
       </div>
       <div class="today-meta">
         <span>Grupo ${match.groupId}</span>
@@ -743,7 +833,7 @@ function renderKnockout() {
   qualifiedTeams.forEach((team) => {
     const badge = document.createElement("span");
     badge.className = "qualified-team";
-    badge.innerHTML = `<strong>${team.qualificationLabel}</strong>${team.name}`;
+    badge.innerHTML = `<strong>${team.qualificationLabel}</strong>${createTeamLabel(team)}`;
     strip.append(badge);
   });
 
@@ -802,9 +892,10 @@ function createBracketMatch(matchId, snapshot, extraClass = "") {
 }
 
 function createBracketTeam(seed) {
+  const label = seed.flag ? createTeamLabel({ flag: seed.flag, name: seed.label }) : seed.label;
   return `
     <div class="bracket-team ${seed.resolved ? "resolved" : ""}">
-      <span>${seed.label}</span>
+      <span>${label}</span>
       <small>${seed.meta}</small>
     </div>
   `;
