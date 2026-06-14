@@ -285,6 +285,32 @@ function formatKickoff(value) {
   return `${day}/${month}/${year}, ${time} BRT`;
 }
 
+function formatKickoffTime(value) {
+  if (!value) return "--:--";
+  return value.split("T")[1];
+}
+
+function getTodayDateBrt() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function formatDateLongBrt(dateValue) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  }).format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
+}
+
 function getStandings(groupId) {
   const group = state.groups.find((item) => item.id === groupId);
   const rows = group.teams.map((team) => ({
@@ -611,6 +637,7 @@ function render() {
 
   renderThirdPlaces();
   renderKnockout();
+  renderTodayMatches();
   renderSummary();
 }
 
@@ -654,6 +681,52 @@ function renderSummary() {
       })
     : "0,00";
   document.querySelector("#qualifiedCount").textContent = 32;
+}
+
+function renderTodayMatches() {
+  const container = document.querySelector("#todayMatches");
+  const label = document.querySelector("#todayDateLabel");
+  if (!container || !label) return;
+
+  const today = getTodayDateBrt();
+  const matches = state.matches
+    .filter((match) => match.scheduledAt?.startsWith(today))
+    .sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
+
+  label.textContent = `${formatDateLongBrt(today)} - Horário de Brasília`;
+  container.innerHTML = "";
+
+  if (!matches.length) {
+    const empty = document.createElement("div");
+    empty.className = "today-empty";
+    empty.textContent = "Nenhum jogo programado para hoje.";
+    container.append(empty);
+    return;
+  }
+
+  matches.forEach((match) => {
+    const home = getTeam(match.homeId);
+    const away = getTeam(match.awayId);
+    const apiResult = remoteResults.matches?.[match.id];
+    const played = isPlayed(match);
+    const card = document.createElement("article");
+    card.className = `today-match ${apiResult?.final ? "today-match-final" : ""}`.trim();
+
+    card.innerHTML = `
+      <div class="today-time">${formatKickoffTime(match.scheduledAt)}</div>
+      <div class="today-game">
+        <span>${home.name}</span>
+        <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
+        <span>${away.name}</span>
+      </div>
+      <div class="today-meta">
+        <span>Grupo ${match.groupId}</span>
+        <em>${apiResult?.final ? "Resultado oficial" : "Programado"}</em>
+      </div>
+    `;
+
+    container.append(card);
+  });
 }
 
 function renderKnockout() {
