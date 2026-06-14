@@ -343,6 +343,10 @@ function createFlag(team) {
 function createTeamLabel(team, side = "left", variant = "") {
   const flag = createFlag(team);
   const variantClass = variant ? ` team-label-${variant}` : "";
+  if (variant === "stacked") {
+    return `<span class="team-label${variantClass}">${flag}<span>${team.name}</span></span>`;
+  }
+
   return side === "right"
     ? `<span class="team-label team-label-right${variantClass}"><span>${team.name}</span>${flag}</span>`
     : `<span class="team-label${variantClass}">${flag}<span>${team.name}</span></span>`;

@@ -393,14 +393,18 @@ tr.third-qualified td {
 
 .team-label-stacked {
   display: inline-grid;
-  justify-items: center;
+  justify-items: start;
   gap: 6px;
-  text-align: center;
+  text-align: left;
 }
 
-.team-label-right.team-label-stacked {
-  justify-items: center;
-  text-align: center;
+.today-team-away {
+  justify-self: end;
+}
+
+.today-team-away .team-label-stacked {
+  justify-items: end;
+  text-align: right;
 }
 
 .team-label span:not(.team-flag) {
