@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-06-13T22:03:54.630Z",
+  "updatedAt": "2026-06-14T00:00:00.000-03:00",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -41,6 +41,30 @@
       "homeGoals": 1,
       "awayGoals": 1,
       "checkedAt": "2026-06-13T22:03:54.630Z"
+    },
+    "C-1": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 1,
+      "awayGoals": 1,
+      "checkedAt": "2026-06-14T00:00:00.000-03:00",
+      "source": "manual"
+    },
+    "C-2": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 0,
+      "awayGoals": 1,
+      "checkedAt": "2026-06-14T00:00:00.000-03:00",
+      "source": "manual"
+    },
+    "D-2": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 0,
+      "checkedAt": "2026-06-14T00:00:00.000-03:00",
+      "source": "manual"
     }
   }
 }
