@@ -805,9 +805,9 @@ function renderTodayMatches() {
     card.innerHTML = `
       <div class="today-time">${formatKickoffTime(match.scheduledAt)}</div>
       <div class="today-game">
-        ${createTeamLabel(home)}
+        <div class="today-team today-team-home">${createTeamLabel(home)}</div>
         <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
-        ${createTeamLabel(away, "right")}
+        <div class="today-team today-team-away">${createTeamLabel(away, "right")}</div>
       </div>
       <div class="today-meta">
         <span>Grupo ${match.groupId}</span>
