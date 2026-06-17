@@ -9,11 +9,6 @@ const leagueId = process.env.API_FOOTBALL_LEAGUE_ID || "";
 const season = process.env.API_FOOTBALL_SEASON || "2026";
 const now = process.env.RESULTS_NOW ? new Date(process.env.RESULTS_NOW) : new Date();
 
-if (!apiKey) {
-  console.log("API_FOOTBALL_KEY is not configured. Skipping result update.");
-  process.exit(0);
-}
-
 const schedule = await readJson("data/schedule.json");
 const results = await readJson("data/results.json", {
   source: "api-football",
@@ -42,12 +37,22 @@ if (!dueMatches.length) {
   await finish(changed, results);
 }
 
+if (!apiKey) {
+  throw new Error(
+    "API_FOOTBALL_KEY is not configured, and there are due matches waiting for results. "
+      + "Configure the repository secret or add the results to data/manual-results.json.",
+  );
+}
+
 console.log(`Checking ${dueMatches.length} due match(es) against API-Football.`);
+console.log(`Lookup scope: ${leagueId ? `league ${leagueId}, season ${season}` : "all competitions by date"}.`);
 const fixtures = await fetchFixturesForDueDates(dueMatches);
 
+let missingFixtureCount = 0;
 for (const match of dueMatches) {
   const fixtureMatch = findFixture(fixtures, match);
   if (!fixtureMatch) {
+    missingFixtureCount += 1;
     console.log(`No API fixture found for ${match.id}: ${match.home} x ${match.away}`);
     continue;
   }
@@ -82,6 +87,15 @@ for (const match of dueMatches) {
   }
 }
 
+if (missingFixtureCount === dueMatches.length && fixtures.length === 0) {
+  throw new Error(
+    `API-Football returned zero fixtures for all checked dates, so no due matches could be updated. `
+      + `Checked ${dueMatches.length} due match(es). `
+      + `This usually means the configured league/season is wrong, the API plan does not expose these fixtures, `
+      + `or the API provider has not published World Cup 2026 fixtures/results yet.`,
+  );
+}
+
 await finish(changed, results);
 
 async function readJson(path, fallback = undefined) {
@@ -98,12 +112,16 @@ function applyManualResults(results, manualResults) {
 
   for (const [matchId, result] of Object.entries(manualResults.matches || {})) {
     const previous = results.matches[matchId];
-    if (previous?.final) continue;
+    if (previous?.final && previous.source !== "manual") continue;
 
-    results.matches[matchId] = {
+    const nextResult = {
       ...result,
       source: "manual",
     };
+
+    if (JSON.stringify(previous) === JSON.stringify(nextResult)) continue;
+
+    results.matches[matchId] = nextResult;
     changed = true;
     console.log(`Applied manual final result for ${matchId}.`);
   }
@@ -129,7 +147,19 @@ async function fetchFixturesForDueDates(matches) {
   const fixtures = [];
 
   for (const date of dates) {
-    const dateFixtures = await fetchFixtures({ date });
+    let dateFixtures = [];
+
+    try {
+      dateFixtures = await fetchFixtures({ date });
+    } catch (error) {
+      if (!leagueId) throw error;
+      console.log(`League-scoped API lookup failed for ${date}: ${error.message}`);
+      console.log(`Retrying ${date} across all competitions.`);
+      const fallbackFixtures = await fetchFixtures({ date, ignoreLeague: true });
+      fixtures.push(...fallbackFixtures);
+      continue;
+    }
+
     if (dateFixtures.length || !leagueId) {
       fixtures.push(...dateFixtures);
       continue;
@@ -164,11 +194,30 @@ async function fetchFixtures({ date, ignoreLeague = false }) {
   }
 
   const payload = await response.json();
+  const apiErrors = normalizeApiErrors(payload.errors);
+  if (apiErrors.length) {
+    throw new Error(`API-Football returned error(s) for ${date}: ${apiErrors.join("; ")}`);
+  }
+
   const fixtures = payload.response || [];
   const scope = leagueId && !ignoreLeague ? `league ${leagueId}, season ${season}` : "all competitions";
   console.log(`API returned ${fixtures.length} fixture(s) for ${date} (${scope}).`);
 
   return fixtures;
+}
+
+function normalizeApiErrors(errors) {
+  if (!errors) return [];
+  if (Array.isArray(errors)) return errors.map(String).filter(Boolean);
+  if (typeof errors === "string") return errors ? [errors] : [];
+  if (typeof errors === "object") {
+    return Object.entries(errors).flatMap(([key, value]) => {
+      if (Array.isArray(value)) return value.map((item) => `${key}: ${item}`);
+      if (value) return [`${key}: ${value}`];
+      return [];
+    });
+  }
+  return [String(errors)];
 }
 
 function findFixture(fixtures, match) {
