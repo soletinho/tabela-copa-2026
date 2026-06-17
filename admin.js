@@ -220,8 +220,9 @@ async function persistFiles(message) {
   setBusy(true);
   showStatus("Gravando no GitHub...", "info");
   try {
-    await putGithubFile(paths.manual, manualResults, message, token);
-    await putGithubFile(paths.results, results, message, token);
+    await refreshRemoteResultFiles(token);
+    await putGithubFileWithRetry(paths.manual, manualResults, message, token);
+    await putGithubFileWithRetry(paths.results, results, message, token);
     renderManualResultsList();
     updatePreview();
     showStatus("Resultado salvo no GitHub. O GitHub Pages pode levar alguns instantes para refletir a mudança.", "ok");
@@ -232,9 +233,48 @@ async function persistFiles(message) {
   }
 }
 
+async function refreshRemoteResultFiles(token) {
+  const [remoteManual, remoteResults] = await Promise.all([
+    getGithubJsonFile(paths.manual, token),
+    getGithubJsonFile(paths.results, token),
+  ]);
+
+  manualResults = mergeResultFiles(normalizeResultsFile(remoteManual.content, "manual"), manualResults);
+  results = mergeResultFiles(normalizeResultsFile(remoteResults.content, "api-football"), results);
+}
+
+function mergeResultFiles(remoteFile, localFile) {
+  return {
+    ...remoteFile,
+    ...localFile,
+    matches: {
+      ...(remoteFile.matches || {}),
+      ...(localFile.matches || {}),
+    },
+  };
+}
+
+async function getGithubJsonFile(path, token) {
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  const current = await githubRequest(`${url}?ref=${BRANCH}&v=${Date.now()}`, { token });
+  return {
+    sha: current.sha,
+    content: JSON.parse(fromBase64Utf8(current.content || "")),
+  };
+}
+
+async function putGithubFileWithRetry(path, data, message, token) {
+  try {
+    await putGithubFile(path, data, message, token);
+  } catch (error) {
+    if (!String(error.message).includes("HTTP 409")) throw error;
+    await putGithubFile(path, data, message, token);
+  }
+}
+
 async function putGithubFile(path, data, message, token) {
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-  const current = await githubRequest(`${url}?ref=${BRANCH}`, { token });
+  const current = await githubRequest(`${url}?ref=${BRANCH}&v=${Date.now()}`, { token });
   const content = `${JSON.stringify(data, null, 2)}\n`;
   await githubRequest(url, {
     token,
@@ -313,6 +353,13 @@ function toBase64Utf8(value) {
   let binary = "";
   bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
   return btoa(binary);
+}
+
+function fromBase64Utf8(value) {
+  const cleanValue = String(value || "").replace(/\s/g, "");
+  const binary = atob(cleanValue);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 function escapeHtml(value) {
