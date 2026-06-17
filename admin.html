@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin — Copa do Mundo 2026</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">Área administrativa</p>
+          <h1>Placares da Copa 2026</h1>
+          <p>Atualize manualmente os resultados da tabela hospedada no GitHub Pages.</p>
+        </div>
+        <a class="public-link" href="./">Ver tabela pública</a>
+      </header>
+
+      <section class="panel warning-panel">
+        <h2>Segurança</h2>
+        <p>
+          O token GitHub não fica salvo no código do site. Ele é usado apenas no seu navegador para gravar
+          os arquivos <code>data/manual-results.json</code> e <code>data/results.json</code> no repositório.
+        </p>
+      </section>
+
+      <section class="panel token-panel">
+        <h2>Acesso ao GitHub</h2>
+        <label>
+          Token GitHub com permissão de escrita no repositório
+          <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_..." />
+        </label>
+        <div class="inline-actions">
+          <button id="saveTokenButton" type="button">Salvar neste navegador</button>
+          <button id="clearTokenButton" type="button" class="ghost">Limpar token salvo</button>
+        </div>
+        <p class="hint">Se preferir, cole o token apenas na hora de salvar e não use o botão de salvar.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Resultado manual</h2>
+            <p>Escolha a partida, informe o placar e salve. O site público será atualizado pelo GitHub Pages.</p>
+          </div>
+          <button id="reloadButton" type="button" class="ghost">Recarregar dados</button>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            Grupo
+            <select id="groupSelect"></select>
+          </label>
+          <label>
+            Partida
+            <select id="matchSelect"></select>
+          </label>
+          <label>
+            Gols mandante
+            <input id="homeGoalsInput" type="number" min="0" step="1" inputmode="numeric" />
+          </label>
+          <label>
+            Gols visitante
+            <input id="awayGoalsInput" type="number" min="0" step="1" inputmode="numeric" />
+          </label>
+          <label>
+            Status
+            <select id="statusSelect">
+              <option value="FT">Finalizado</option>
+              <option value="AET">Prorrogação</option>
+              <option value="PEN">Pênaltis</option>
+              <option value="LIVE">Em andamento</option>
+            </select>
+          </label>
+          <label class="checkbox-label">
+            <input id="finalCheckbox" type="checkbox" checked />
+            Resultado final
+          </label>
+        </div>
+
+        <article id="matchPreview" class="match-preview" aria-live="polite"></article>
+
+        <div class="inline-actions">
+          <button id="saveResultButton" type="button">Salvar resultado</button>
+          <button id="removeResultButton" type="button" class="danger">Remover resultado manual</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Resultados manuais salvos</h2>
+        <div id="manualResultsList" class="results-list"></div>
+      </section>
+
+      <section id="statusBox" class="status-box" aria-live="polite"></section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
