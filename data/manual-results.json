@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-06-20T17:58:42.842Z",
+  "updatedAt": "2026-06-20T17:58:47.949Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -207,10 +207,10 @@
     },
     "F-3": {
       "status": "LIVE",
-      "final": true,
+      "final": false,
       "homeGoals": 2,
       "awayGoals": 0,
-      "checkedAt": "2026-06-20T17:58:42.842Z"
+      "checkedAt": "2026-06-20T17:58:47.949Z"
     }
   }
 }
