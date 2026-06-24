@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-06-24T09:34:13.478Z",
+  "updatedAt": "2026-06-24T20:56:16.204Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -323,6 +323,13 @@
       "homeGoals": 1,
       "awayGoals": 0,
       "checkedAt": "2026-06-24T09:34:13.478Z"
+    },
+    "B-5": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 1,
+      "checkedAt": "2026-06-24T20:56:16.204Z"
     }
   }
 }
