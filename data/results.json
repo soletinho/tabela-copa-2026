@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-06-26T20:59:23.495Z",
+  "updatedAt": "2026-06-27T02:04:10.522Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -496,6 +496,14 @@
       "homeGoals": 5,
       "awayGoals": 0,
       "checkedAt": "2026-06-26T20:59:23.495Z",
+      "source": "manual"
+    },
+    "H-5": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 0,
+      "awayGoals": 1,
+      "checkedAt": "2026-06-27T02:04:10.522Z",
       "source": "manual"
     }
   }
