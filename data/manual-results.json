@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-06-28T09:07:00.314Z",
+  "updatedAt": "2026-06-29T11:36:09.883Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -491,6 +491,15 @@
       "homeGoals": 3,
       "awayGoals": 3,
       "checkedAt": "2026-06-28T09:07:00.314Z"
+    },
+    "R32-1": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 0,
+      "awayGoals": 1,
+      "checkedAt": "2026-06-29T11:36:09.883Z",
+      "homeName": "Africa do Sul",
+      "awayName": "Canadá"
     }
   }
 }
