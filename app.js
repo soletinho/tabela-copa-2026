@@ -311,7 +311,12 @@ function getKnockoutWinner(matchId) {
   const awayName = result.awayName || scheduleMatch.away;
   if (result.homeGoals > result.awayGoals) return { name: homeName, flag: countryFlags[homeName] || "" };
   if (result.awayGoals > result.homeGoals) return { name: awayName, flag: countryFlags[awayName] || "" };
-  return null; // draw shouldn't happen in knockout
+  // Draw — resolve by penalties if available
+  if (result.homePenGoals !== undefined && result.awayPenGoals !== undefined) {
+    if (result.homePenGoals > result.awayPenGoals) return { name: homeName, flag: countryFlags[homeName] || "" };
+    if (result.awayPenGoals > result.homePenGoals) return { name: awayName, flag: countryFlags[awayName] || "" };
+  }
+  return null; // still a draw
 }
 
 function getKnockoutLoser(matchId) {
@@ -323,6 +328,11 @@ function getKnockoutLoser(matchId) {
   const awayName = result.awayName || scheduleMatch.away;
   if (result.homeGoals < result.awayGoals) return { name: homeName, flag: countryFlags[homeName] || "" };
   if (result.awayGoals < result.homeGoals) return { name: awayName, flag: countryFlags[awayName] || "" };
+  // Draw — loser is the one with fewer penalties
+  if (result.homePenGoals !== undefined && result.awayPenGoals !== undefined) {
+    if (result.homePenGoals < result.awayPenGoals) return { name: homeName, flag: countryFlags[homeName] || "" };
+    if (result.awayPenGoals < result.homePenGoals) return { name: awayName, flag: countryFlags[awayName] || "" };
+  }
   return null;
 }
 
@@ -416,10 +426,16 @@ function createBracketMatch(matchId, extraClass = "") {
   const away = resolveKnockoutTeam(matchId, "away");
   const played = result && result.final;
 
-  const homeScore = played ? result.homeGoals : "-";
-  const awayScore = played ? result.awayGoals : "-";
-  const homeWinner = played && result.homeGoals > result.awayGoals;
-  const awayWinner = played && result.awayGoals > result.homeGoals;
+  const homeScore = played ? (result.homePenGoals !== undefined ? `${result.homeGoals} (${result.homePenGoals})` : result.homeGoals) : "-";
+  const awayScore = played ? (result.awayPenGoals !== undefined ? `${result.awayGoals} (${result.awayPenGoals})` : result.awayGoals) : "-";
+  const homeWinner = played && (
+    result.homeGoals > result.awayGoals ||
+    (result.homeGoals === result.awayGoals && result.homePenGoals !== undefined && result.homePenGoals > result.awayPenGoals)
+  );
+  const awayWinner = played && (
+    result.awayGoals > result.homeGoals ||
+    (result.homeGoals === result.awayGoals && result.awayPenGoals !== undefined && result.awayPenGoals > result.homePenGoals)
+  );
 
   const dateLabel = scheduleMatch ? formatKnockoutDate(scheduleMatch.scheduledAtBrt) : "";
 
@@ -686,6 +702,13 @@ function renderTodayMatches() {
     const played = result?.final || false;
     const homeGoals = played ? result.homeGoals : "-";
     const awayGoals = played ? result.awayGoals : "-";
+    const homePen = played && result.homePenGoals !== undefined ? result.homePenGoals : null;
+    const awayPen = played && result.awayPenGoals !== undefined ? result.awayPenGoals : null;
+    const scoreDisplay = played
+      ? (homePen !== null || awayPen !== null
+          ? `${homeGoals} (${homePen ?? "—"}) x ${awayGoals} (${awayPen ?? "—"})`
+          : `${homeGoals} x ${awayGoals}`)
+      : "x";
     const homeName = match.type === "knockout" ? (result?.homeName || match.home) : getTeam(match.homeId).name;
     const awayName = match.type === "knockout" ? (result?.awayName || match.away) : getTeam(match.awayId).name;
     const homeFlag = match.type === "knockout" ? (countryFlags[homeName] || "") : getTeam(match.homeId).flag;
@@ -700,7 +723,7 @@ function renderTodayMatches() {
       <div class="today-time">${formatKickoffTime(match.sortTime)}</div>
       <div class="today-game">
         <div class="today-team today-team-home">${createTeamLabel({ flag: homeFlag, name: homeName }, "left", "stacked")}</div>
-        <strong>${played ? `${homeGoals} x ${awayGoals}` : "x"}</strong>
+        <strong>${scoreDisplay}</strong>
         <div class="today-team today-team-away">${createTeamLabel({ flag: awayFlag, name: awayName }, "right", "stacked")}</div>
       </div>
       <div class="today-meta"><span>${roundLabel}</span><em>${played ? "Resultado oficial" : "Programado"}</em></div>

@@ -26,6 +26,10 @@ const groupSelect = document.querySelector("#groupSelect");
 const matchSelect = document.querySelector("#matchSelect");
 const knockoutHomeLabel = document.querySelector("#knockoutHomeLabel");
 const knockoutAwayLabel = document.querySelector("#knockoutAwayLabel");
+const penaltyHomeLabel = document.querySelector("#penaltyHomeLabel");
+const penaltyAwayLabel = document.querySelector("#penaltyAwayLabel");
+const penaltyHomeInput = document.querySelector("#penaltyHomeInput");
+const penaltyAwayInput = document.querySelector("#penaltyAwayInput");
 const knockoutHomeInput = document.querySelector("#knockoutHomeInput");
 const knockoutAwayInput = document.querySelector("#knockoutAwayInput");
 const homeGoalsInput = document.querySelector("#homeGoalsInput");
@@ -76,7 +80,7 @@ function bindEvents() {
   knockoutHomeInput.addEventListener("input", () => { saveKnockoutTeamNames(); updatePreview(); });
   knockoutAwayInput.addEventListener("input", () => { saveKnockoutTeamNames(); updatePreview(); });
 
-  [homeGoalsInput, awayGoalsInput, statusSelect, finalCheckbox].forEach((el) => {
+  [homeGoalsInput, awayGoalsInput, penaltyHomeInput, penaltyAwayInput, statusSelect, finalCheckbox].forEach((el) => {
     el.addEventListener("input", updatePreview);
     el.addEventListener("change", updatePreview);
   });
@@ -94,6 +98,8 @@ function onPhaseChange() {
   groupSelect.hidden = knockout;
   knockoutHomeLabel.hidden = !knockout;
   knockoutAwayLabel.hidden = !knockout;
+  penaltyHomeLabel.hidden = !knockout;
+  penaltyAwayLabel.hidden = !knockout;
 
   if (knockout) {
     populateKnockoutMatches();
@@ -247,6 +253,8 @@ function loadSelectedResultIntoForm() {
   const saved = manualResults.matches[match.id] || results.matches[match.id] || {};
   homeGoalsInput.value = saved.homeGoals ?? "";
   awayGoalsInput.value = saved.awayGoals ?? "";
+  penaltyHomeInput.value = saved.homePenGoals ?? "";
+  penaltyAwayInput.value = saved.awayPenGoals ?? "";
   statusSelect.value = saved.status || "FT";
   finalCheckbox.checked = saved.final !== false;
   updatePreview();
@@ -263,9 +271,14 @@ function updatePreview() {
   const awayName = knockout ? (getKnockoutTeamName(match, "away") || "?") : match.away;
   const homeGoals = homeGoalsInput.value === "" ? "—" : homeGoalsInput.value;
   const awayGoals = awayGoalsInput.value === "" ? "—" : awayGoalsInput.value;
+  const homePen = penaltyHomeInput.value === "" ? null : penaltyHomeInput.value;
+  const awayPen = penaltyAwayInput.value === "" ? null : penaltyAwayInput.value;
+  const penStr = (homePen !== null || awayPen !== null)
+    ? ` <small>(pên ${homePen ?? "—"} x ${awayPen ?? "—"})</small>`
+    : "";
   const saved = manualResults.matches[match.id];
   matchPreview.innerHTML = `
-    <strong>${escapeHtml(match.id)} — ${escapeHtml(homeName)} ${homeGoals} x ${awayGoals} ${escapeHtml(awayName)}</strong>
+    <strong>${escapeHtml(match.id)} — ${escapeHtml(homeName)} ${homeGoals} x ${awayGoals} ${escapeHtml(awayName)}${penStr}</strong>
     <span>${formatDateTime(match.scheduledAtBrt)} • ${finalCheckbox.checked ? "resultado final" : "não final"} • ${escapeHtml(statusSelect.value)}</span>
     <small>${saved ? "Já existe resultado manual salvo para esta partida." : "Sem resultado manual salvo para esta partida."}</small>
   `;
@@ -287,6 +300,9 @@ async function saveSelectedResult() {
   const awayGoals = parseScore(awayGoalsInput.value, "gols do visitante");
   if (homeGoals === null || awayGoals === null) return;
 
+  const homePenGoals = parseOptionalScore(penaltyHomeInput.value);
+  const awayPenGoals = parseOptionalScore(penaltyAwayInput.value);
+
   const now = new Date().toISOString();
   const result = {
     status: statusSelect.value || "FT",
@@ -297,6 +313,9 @@ async function saveSelectedResult() {
     homeName: knockout ? homeName : undefined,
     awayName: knockout ? awayName : undefined,
   };
+
+  if (homePenGoals !== null) result.homePenGoals = homePenGoals;
+  if (awayPenGoals !== null) result.awayPenGoals = awayPenGoals;
 
   // Clean undefined keys
   if (result.homeName === undefined) delete result.homeName;
@@ -348,6 +367,16 @@ function parseScore(value, label) {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 0) {
     showStatus(`O campo ${label} precisa ser um inteiro maior ou igual a zero.`, "error");
+    return null;
+  }
+  return number;
+}
+
+function parseOptionalScore(value) {
+  if (value === "") return null;
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 0) {
+    showStatus("Os gols de pênaltis precisam ser um inteiro maior ou igual a zero.", "error");
     return null;
   }
   return number;
@@ -460,11 +489,14 @@ function renderManualResultsList() {
     const match = findMatchById(matchId);
     const homeName = result.homeName || (match ? match.home : "?");
     const awayName = result.awayName || (match ? match.away : "?");
+    const penInfo = (result.homePenGoals !== undefined || result.awayPenGoals !== undefined)
+      ? ` <small>(pên ${result.homePenGoals ?? "—"} x ${result.awayPenGoals ?? "—"})</small>`
+      : "";
     const label = `${homeName} ${result.homeGoals} x ${result.awayGoals} ${awayName}`;
     return `
       <article class="result-item">
         <div>
-          <strong>${escapeHtml(matchId)} — ${escapeHtml(label)}</strong><br />
+          <strong>${escapeHtml(matchId)} — ${escapeHtml(label)}${penInfo}</strong><br />
           <small>${escapeHtml(result.status || "FT")} • ${result.final === false ? "não final" : "final"}</small>
         </div>
         <small>${formatIso(result.checkedAt)}</small>
