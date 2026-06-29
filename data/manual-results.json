@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-06-29T11:59:39.360Z",
+  "updatedAt": "2026-06-29T19:33:10.352Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -500,6 +500,15 @@
       "checkedAt": "2026-06-29T11:59:39.360Z",
       "homeName": "Africa do Sul",
       "awayName": "Canadá"
+    },
+    "R32-9": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 1,
+      "awayGoals": 0,
+      "checkedAt": "2026-06-29T19:33:10.352Z",
+      "homeName": "Brasil",
+      "awayName": "Japão"
     }
   }
 }
