@@ -430,8 +430,30 @@ tr.third-qualified td {
 }
 
 .matches {
-  display: grid;
+  display: none;
   gap: 10px;
+}
+
+.matches.expanded {
+  display: grid;
+}
+
+.toggle-matches {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.toggle-matches:hover {
+  background: #eef8f4;
 }
 
 .match {
@@ -676,6 +698,17 @@ tr.third-qualified td {
 .bracket-team small {
   color: var(--muted);
   font-weight: 800;
+}
+
+.bracket-team.winner {
+  background: #e0f2e9;
+  font-weight: 900;
+}
+
+.bracket-score {
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: var(--primary-dark);
 }
 
 .bracket-center {

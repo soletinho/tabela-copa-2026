@@ -1,5 +1,7 @@
 const STORAGE_KEY = "copa-2026-tabela";
 const RESULTS_URL = "data/results.json";
+const MANUAL_URL = "data/manual-results.json";
+const KNOCKOUT_URL = "data/knockout-schedule.json";
 
 const groupTeams = {
   A: ["México", "África do Sul", "Coreia do Sul", "República Tcheca"],
@@ -17,54 +19,34 @@ const groupTeams = {
 };
 
 const teamFlags = {
-  A1: "mx",
-  A2: "za",
-  A3: "kr",
-  A4: "cz",
-  B1: "ca",
-  B2: "ba",
-  B3: "qa",
-  B4: "ch",
-  C1: "br",
-  C2: "ma",
-  C3: "ht",
-  C4: "gb-sct",
-  D1: "us",
-  D2: "py",
-  D3: "au",
-  D4: "tr",
-  E1: "de",
-  E2: "cw",
-  E3: "ci",
-  E4: "ec",
-  F1: "nl",
-  F2: "jp",
-  F3: "se",
-  F4: "tn",
-  G1: "be",
-  G2: "eg",
-  G3: "ir",
-  G4: "nz",
-  H1: "es",
-  H2: "cv",
-  H3: "sa",
-  H4: "uy",
-  I1: "fr",
-  I2: "sn",
-  I3: "iq",
-  I4: "no",
-  J1: "ar",
-  J2: "dz",
-  J3: "at",
-  J4: "jo",
-  K1: "pt",
-  K2: "cd",
-  K3: "uz",
-  K4: "co",
-  L1: "gb-eng",
-  L2: "hr",
-  L3: "gh",
-  L4: "pa",
+  A1: "mx", A2: "za", A3: "kr", A4: "cz",
+  B1: "ca", B2: "ba", B3: "qa", B4: "ch",
+  C1: "br", C2: "ma", C3: "ht", C4: "gb-sct",
+  D1: "us", D2: "py", D3: "au", D4: "tr",
+  E1: "de", E2: "cw", E3: "ci", E4: "ec",
+  F1: "nl", F2: "jp", F3: "se", F4: "tn",
+  G1: "be", G2: "eg", G3: "ir", G4: "nz",
+  H1: "es", H2: "cv", H3: "sa", H4: "uy",
+  I1: "fr", I2: "sn", I3: "iq", I4: "no",
+  J1: "ar", J2: "dz", J3: "at", J4: "jo",
+  K1: "pt", K2: "cd", K3: "uz", K4: "co",
+  L1: "gb-eng", L2: "hr", L3: "gh", L4: "pa",
+};
+
+// Country name -> flag code mapping for knockout
+const countryFlags = {
+  "África do Sul": "za", "Alemanha": "de", "Argentina": "ar", "Argélia": "dz",
+  "Austrália": "au", "Áustria": "at", "Bélgica": "be", "Bósnia": "ba",
+  "Brasil": "br", "Cabo Verde": "cv", "Canadá": "ca", "Colômbia": "co",
+  "Coreia do Sul": "kr", "Costa do Marfim": "ci", "Croácia": "hr", "Curaçao": "cw",
+  "Egito": "eg", "Equador": "ec", "Escócia": "gb-sct", "Espanha": "es",
+  "Estados Unidos": "us", "França": "fr", "Gana": "gh", "Haiti": "ht",
+  "Holanda": "nl", "Inglaterra": "gb-eng", "Irã": "ir", "Iraque": "iq",
+  "Japão": "jp", "Jordânia": "jo", "Marrocos": "ma", "México": "mx",
+  "Noruega": "no", "Nova Zelândia": "nz", "Panamá": "pa", "Paraguai": "py",
+  "Portugal": "pt", "RD Congo": "cd", "República Tcheca": "cz", "Senegal": "sn",
+  "Suécia": "se", "Suíça": "ch", "Tunísia": "tn", "Turquia": "tr",
+  "Uruguai": "uy", "Uzbequistão": "uz", "Catar": "qa",
 };
 
 const initialGroups = Object.entries(groupTeams).map(([letter, teams]) => ({
@@ -77,144 +59,86 @@ const initialGroups = Object.entries(groupTeams).map(([letter, teams]) => ({
 }));
 
 const groupStageRounds = [
-  ["1", "2"],
-  ["3", "4"],
-  ["1", "3"],
-  ["4", "2"],
-  ["4", "1"],
-  ["2", "3"],
+  ["1", "2"], ["3", "4"], ["1", "3"], ["4", "2"], ["4", "1"], ["2", "3"],
 ];
 
 const kickoffTimes = {
-  "A-1": "2026-06-11T16:00",
-  "A-2": "2026-06-11T23:00",
-  "A-3": "2026-06-18T22:00",
-  "A-4": "2026-06-18T13:00",
-  "A-5": "2026-06-24T22:00",
-  "A-6": "2026-06-24T22:00",
-  "B-1": "2026-06-12T19:00",
-  "B-2": "2026-06-13T16:00",
-  "B-3": "2026-06-18T19:00",
-  "B-4": "2026-06-18T16:00",
-  "B-5": "2026-06-24T16:00",
-  "B-6": "2026-06-24T16:00",
-  "C-1": "2026-06-13T19:00",
-  "C-2": "2026-06-13T22:00",
-  "C-3": "2026-06-19T21:30",
-  "C-4": "2026-06-19T19:00",
-  "C-5": "2026-06-24T19:00",
-  "C-6": "2026-06-24T19:00",
-  "D-1": "2026-06-12T22:00",
-  "D-2": "2026-06-14T01:00",
-  "D-3": "2026-06-19T16:00",
-  "D-4": "2026-06-20T00:00",
-  "D-5": "2026-06-25T23:00",
-  "D-6": "2026-06-25T23:00",
-  "E-1": "2026-06-14T14:00",
-  "E-2": "2026-06-14T20:00",
-  "E-3": "2026-06-20T17:00",
-  "E-4": "2026-06-20T21:00",
-  "E-5": "2026-06-25T17:00",
-  "E-6": "2026-06-25T17:00",
-  "F-1": "2026-06-14T17:00",
-  "F-2": "2026-06-14T23:00",
-  "F-3": "2026-06-20T14:00",
-  "F-4": "2026-06-21T01:00",
-  "F-5": "2026-06-25T20:00",
-  "F-6": "2026-06-25T20:00",
-  "G-1": "2026-06-15T16:00",
-  "G-2": "2026-06-15T22:00",
-  "G-3": "2026-06-21T16:00",
-  "G-4": "2026-06-21T22:00",
-  "G-5": "2026-06-27T00:00",
-  "G-6": "2026-06-27T00:00",
-  "H-1": "2026-06-15T13:00",
-  "H-2": "2026-06-15T19:00",
-  "H-3": "2026-06-21T13:00",
-  "H-4": "2026-06-21T19:00",
-  "H-5": "2026-06-26T21:00",
-  "H-6": "2026-06-26T21:00",
-  "I-1": "2026-06-16T16:00",
-  "I-2": "2026-06-16T19:00",
-  "I-3": "2026-06-22T18:00",
-  "I-4": "2026-06-22T21:00",
-  "I-5": "2026-06-26T16:00",
-  "I-6": "2026-06-26T16:00",
-  "J-1": "2026-06-16T22:00",
-  "J-2": "2026-06-17T01:00",
-  "J-3": "2026-06-22T14:00",
-  "J-4": "2026-06-23T00:00",
-  "J-5": "2026-06-27T23:00",
-  "J-6": "2026-06-27T23:00",
-  "K-1": "2026-06-17T14:00",
-  "K-2": "2026-06-17T23:00",
-  "K-3": "2026-06-23T14:00",
-  "K-4": "2026-06-23T23:00",
-  "K-5": "2026-06-27T20:30",
-  "K-6": "2026-06-27T20:30",
-  "L-1": "2026-06-17T17:00",
-  "L-2": "2026-06-17T20:00",
-  "L-3": "2026-06-23T17:00",
-  "L-4": "2026-06-23T20:00",
-  "L-5": "2026-06-27T18:00",
-  "L-6": "2026-06-27T18:00",
+  "A-1": "2026-06-11T16:00", "A-2": "2026-06-11T23:00", "A-3": "2026-06-18T22:00",
+  "A-4": "2026-06-18T13:00", "A-5": "2026-06-24T22:00", "A-6": "2026-06-24T22:00",
+  "B-1": "2026-06-12T19:00", "B-2": "2026-06-13T16:00", "B-3": "2026-06-18T19:00",
+  "B-4": "2026-06-18T16:00", "B-5": "2026-06-24T16:00", "B-6": "2026-06-24T16:00",
+  "C-1": "2026-06-13T19:00", "C-2": "2026-06-13T22:00", "C-3": "2026-06-19T21:30",
+  "C-4": "2026-06-19T19:00", "C-5": "2026-06-24T19:00", "C-6": "2026-06-24T19:00",
+  "D-1": "2026-06-12T22:00", "D-2": "2026-06-14T01:00", "D-3": "2026-06-19T16:00",
+  "D-4": "2026-06-20T00:00", "D-5": "2026-06-25T23:00", "D-6": "2026-06-25T23:00",
+  "E-1": "2026-06-14T14:00", "E-2": "2026-06-14T20:00", "E-3": "2026-06-20T17:00",
+  "E-4": "2026-06-20T21:00", "E-5": "2026-06-25T17:00", "E-6": "2026-06-25T17:00",
+  "F-1": "2026-06-14T17:00", "F-2": "2026-06-14T23:00", "F-3": "2026-06-20T14:00",
+  "F-4": "2026-06-21T01:00", "F-5": "2026-06-25T20:00", "F-6": "2026-06-25T20:00",
+  "G-1": "2026-06-15T16:00", "G-2": "2026-06-15T22:00", "G-3": "2026-06-21T16:00",
+  "G-4": "2026-06-21T22:00", "G-5": "2026-06-27T00:00", "G-6": "2026-06-27T00:00",
+  "H-1": "2026-06-15T13:00", "H-2": "2026-06-15T19:00", "H-3": "2026-06-21T13:00",
+  "H-4": "2026-06-21T19:00", "H-5": "2026-06-26T21:00", "H-6": "2026-06-26T21:00",
+  "I-1": "2026-06-16T16:00", "I-2": "2026-06-16T19:00", "I-3": "2026-06-22T18:00",
+  "I-4": "2026-06-22T21:00", "I-5": "2026-06-26T16:00", "I-6": "2026-06-26T16:00",
+  "J-1": "2026-06-16T22:00", "J-2": "2026-06-17T01:00", "J-3": "2026-06-22T14:00",
+  "J-4": "2026-06-23T00:00", "J-5": "2026-06-27T23:00", "J-6": "2026-06-27T23:00",
+  "K-1": "2026-06-17T14:00", "K-2": "2026-06-17T23:00", "K-3": "2026-06-23T14:00",
+  "K-4": "2026-06-23T23:00", "K-5": "2026-06-27T20:30", "K-6": "2026-06-27T20:30",
+  "L-1": "2026-06-17T17:00", "L-2": "2026-06-17T20:00", "L-3": "2026-06-23T17:00",
+  "L-4": "2026-06-23T20:00", "L-5": "2026-06-27T18:00", "L-6": "2026-06-27T18:00",
 };
 
-const roundOf32Matches = [
-  { id: 73, home: { type: "runnerUp", group: "A" }, away: { type: "runnerUp", group: "B" } },
-  { id: 74, home: { type: "winner", group: "E" }, away: { type: "third", groups: ["A", "B", "C", "D", "F"] } },
-  { id: 75, home: { type: "winner", group: "F" }, away: { type: "runnerUp", group: "C" } },
-  { id: 76, home: { type: "winner", group: "C" }, away: { type: "runnerUp", group: "F" } },
-  { id: 77, home: { type: "winner", group: "I" }, away: { type: "third", groups: ["C", "D", "F", "G", "H"] } },
-  { id: 78, home: { type: "runnerUp", group: "E" }, away: { type: "runnerUp", group: "I" } },
-  { id: 79, home: { type: "winner", group: "A" }, away: { type: "third", groups: ["C", "E", "F", "H", "I"] } },
-  { id: 80, home: { type: "winner", group: "L" }, away: { type: "third", groups: ["E", "H", "I", "J", "K"] } },
-  { id: 81, home: { type: "winner", group: "D" }, away: { type: "third", groups: ["B", "E", "F", "I", "J"] } },
-  { id: 82, home: { type: "winner", group: "G" }, away: { type: "third", groups: ["A", "E", "H", "I", "J"] } },
-  { id: 83, home: { type: "runnerUp", group: "K" }, away: { type: "runnerUp", group: "L" } },
-  { id: 84, home: { type: "winner", group: "H" }, away: { type: "runnerUp", group: "J" } },
-  { id: 85, home: { type: "winner", group: "B" }, away: { type: "third", groups: ["E", "F", "G", "I", "J"] } },
-  { id: 86, home: { type: "winner", group: "J" }, away: { type: "runnerUp", group: "H" } },
-  { id: 87, home: { type: "winner", group: "K" }, away: { type: "third", groups: ["D", "E", "I", "J", "L"] } },
-  { id: 88, home: { type: "runnerUp", group: "D" }, away: { type: "runnerUp", group: "G" } },
-];
-
-const knockoutMatches = [
-  ...roundOf32Matches,
-  { id: 89, home: { type: "matchWinner", match: 74 }, away: { type: "matchWinner", match: 77 } },
-  { id: 90, home: { type: "matchWinner", match: 73 }, away: { type: "matchWinner", match: 75 } },
-  { id: 91, home: { type: "matchWinner", match: 76 }, away: { type: "matchWinner", match: 78 } },
-  { id: 92, home: { type: "matchWinner", match: 79 }, away: { type: "matchWinner", match: 80 } },
-  { id: 93, home: { type: "matchWinner", match: 83 }, away: { type: "matchWinner", match: 84 } },
-  { id: 94, home: { type: "matchWinner", match: 81 }, away: { type: "matchWinner", match: 82 } },
-  { id: 95, home: { type: "matchWinner", match: 86 }, away: { type: "matchWinner", match: 88 } },
-  { id: 96, home: { type: "matchWinner", match: 85 }, away: { type: "matchWinner", match: 87 } },
-  { id: 97, home: { type: "matchWinner", match: 89 }, away: { type: "matchWinner", match: 90 } },
-  { id: 98, home: { type: "matchWinner", match: 93 }, away: { type: "matchWinner", match: 94 } },
-  { id: 99, home: { type: "matchWinner", match: 91 }, away: { type: "matchWinner", match: 92 } },
-  { id: 100, home: { type: "matchWinner", match: 95 }, away: { type: "matchWinner", match: 96 } },
-  { id: 101, home: { type: "matchWinner", match: 97 }, away: { type: "matchWinner", match: 98 } },
-  { id: 102, home: { type: "matchWinner", match: 99 }, away: { type: "matchWinner", match: 100 } },
-  { id: 103, home: { type: "matchLoser", match: 101 }, away: { type: "matchLoser", match: 102 } },
-  { id: 104, home: { type: "matchWinner", match: 101 }, away: { type: "matchWinner", match: 102 } },
-];
-
-const knockoutMatchById = new Map(knockoutMatches.map((match) => [match.id, match]));
-
-const bracketLayout = {
-  left: [
-    { title: "R32", matches: [74, 77, 73, 75, 83, 84, 81, 82] },
-    { title: "R16", matches: [89, 90, 93, 94] },
-    { title: "QF", matches: [97, 98] },
-    { title: "SF", matches: [101] },
-  ],
-  right: [
-    { title: "SF", matches: [102] },
-    { title: "QF", matches: [99, 100] },
-    { title: "R16", matches: [91, 92, 95, 96] },
-    { title: "R32", matches: [76, 78, 79, 80, 86, 88, 85, 87] },
-  ],
+// ---------- Knockout bracket tree ----------
+// Winner of [0] plays winner of [1] → next round slot
+const knockoutTree = {
+  left: {
+    R32: ["R32-1","R32-2","R32-3","R32-4","R32-5","R32-6","R32-7","R32-8"],
+    R16: ["R16-1","R16-2","R16-3","R16-4"],
+    QF:  ["QF-1","QF-2"],
+    SF:  ["SF-1"],
+  },
+  right: {
+    R32: ["R32-9","R32-10","R32-11","R32-12","R32-13","R32-14","R32-15","R32-16"],
+    R16: ["R16-5","R16-6","R16-7","R16-8"],
+    QF:  ["QF-3","QF-4"],
+    SF:  ["SF-2"],
+  },
+  center: {
+    FINAL: ["FINAL"],
+    THIRD: ["3RD"],
+  },
 };
+
+// Adjacent pairs in R32 feed into R16, etc.
+const roundConnections = {
+  "R16-1": ["R32-1","R32-2"], "R16-2": ["R32-3","R32-4"],
+  "R16-3": ["R32-5","R32-6"], "R16-4": ["R32-7","R32-8"],
+  "R16-5": ["R32-9","R32-10"], "R16-6": ["R32-11","R32-12"],
+  "R16-7": ["R32-13","R32-14"], "R16-8": ["R32-15","R32-16"],
+  "QF-1": ["R16-1","R16-2"], "QF-2": ["R16-3","R16-4"],
+  "QF-3": ["R16-5","R16-6"], "QF-4": ["R16-7","R16-8"],
+  "SF-1": ["QF-1","QF-2"], "SF-2": ["QF-3","QF-4"],
+  "FINAL": ["SF-1","SF-2"], "3RD": ["SF-1","SF-2"],
+};
+
+// ---------- State ----------
+let state = loadState();
+let remoteResults = { matches: {}, updatedAt: null };
+let knockoutSchedule = { rounds: {} };
+let allResults = {}; // merged results + manual-results
+
+const groupsEl = document.querySelector("#groups");
+const groupFilterEl = document.querySelector("#groupFilter");
+const teamSearchEl = document.querySelector("#teamSearch");
+const showOnlyPlayedEl = document.querySelector("#showOnlyPlayed");
+
+function loadState() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return createDefaultState();
+  try { return migrateState(JSON.parse(saved)); }
+  catch { return createDefaultState(); }
+}
 
 function createDefaultState() {
   return {
@@ -234,89 +158,66 @@ function createDefaultState() {
   };
 }
 
-let state = loadState();
-let remoteResults = {
-  matches: {},
-  updatedAt: null,
-};
-
-const groupsEl = document.querySelector("#groups");
-const groupFilterEl = document.querySelector("#groupFilter");
-const teamSearchEl = document.querySelector("#teamSearch");
-const showOnlyPlayedEl = document.querySelector("#showOnlyPlayed");
-
-function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return createDefaultState();
-
-  try {
-    return migrateState(JSON.parse(saved));
-  } catch {
-    return createDefaultState();
-  }
-}
-
 function migrateState(savedState) {
-  const nextState = {
-    ...createDefaultState(),
-    ...savedState,
-  };
-  const officialTeams = new Map(
-    initialGroups.flatMap((group) => group.teams.map((team) => [team.id, team])),
-  );
-
+  const nextState = { ...createDefaultState(), ...savedState };
+  const officialTeams = new Map(initialGroups.flatMap((group) => group.teams.map((team) => [team.id, team])));
   nextState.groups = nextState.groups.map((group) => ({
     ...group,
     teams: group.teams.map((team) => {
-      const oldPlaceholder = /^Grupo [A-L] - Selecao [1-4]$/.test(team.name);
       const officialTeam = officialTeams.get(team.id);
       if (!officialTeam) return team;
-
-      return {
-        ...team,
-        flag: team.flag || officialTeam.flag,
-        name: oldPlaceholder ? officialTeam.name : team.name,
-      };
+      return { ...team, flag: team.flag || officialTeam.flag, name: /^Grupo [A-L] - Selecao [1-4]$/.test(team.name) ? officialTeam.name : team.name };
     }),
   }));
-  nextState.matches = nextState.matches.map((match) => ({
-    ...match,
-    scheduledAt: match.scheduledAt || kickoffTimes[match.id],
-  }));
-
+  nextState.matches = nextState.matches.map((match) => ({ ...match, scheduledAt: match.scheduledAt || kickoffTimes[match.id] }));
   return nextState;
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+// ---------- Data Loading ----------
+async function loadAllData() {
+  await Promise.all([loadRemoteResults(), loadKnockoutSchedule()]);
+  mergeAllResults();
+  render();
 }
 
 async function loadRemoteResults() {
   try {
-    const response = await fetch(`${RESULTS_URL}?v=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) return;
-
-    const data = await response.json();
-    remoteResults = data;
-    applyRemoteResults(data.matches || {});
-    render();
-  } catch {
-    // The local table keeps working even when the hosted results file is unavailable.
-  }
+    const [resResp, manResp] = await Promise.all([
+      fetch(`${RESULTS_URL}?v=${Date.now()}`, { cache: "no-store" }),
+      fetch(`${MANUAL_URL}?v=${Date.now()}`, { cache: "no-store" }),
+    ]);
+    let resData = { matches: {}, updatedAt: null };
+    let manData = { matches: {}, updatedAt: null };
+    if (resResp.ok) resData = await resResp.json();
+    if (manResp.ok) manData = await manResp.json();
+    remoteResults = { matches: { ...resData.matches, ...manData.matches }, updatedAt: manData.updatedAt || resData.updatedAt };
+  } catch { /* offline ok */ }
 }
 
-function applyRemoteResults(matches) {
-  state.matches.forEach((match) => {
-    const result = matches[match.id];
-    if (!result || !result.final) return;
+async function loadKnockoutSchedule() {
+  try {
+    const resp = await fetch(`${KNOCKOUT_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (resp.ok) knockoutSchedule = await resp.json();
+  } catch { knockoutSchedule = { rounds: {} }; }
+}
 
-    match.homeGoals = String(result.homeGoals);
-    match.awayGoals = String(result.awayGoals);
-    match.status = result.status || "FT";
-    match.source = "api";
+function mergeAllResults() {
+  allResults = { ...remoteResults.matches };
+  // Apply group results to local state
+  state.matches.forEach((match) => {
+    const result = allResults[match.id];
+    if (result && result.final) {
+      match.homeGoals = String(result.homeGoals);
+      match.awayGoals = String(result.awayGoals);
+      match.status = result.status || "FT";
+      match.source = result.source || "api";
+    }
   });
 }
 
+// ---------- Helpers ----------
 function getTeam(teamId) {
   for (const group of state.groups) {
     const team = group.teams.find((item) => item.id === teamId);
@@ -327,17 +228,7 @@ function getTeam(teamId) {
 
 function createFlag(team) {
   if (!team.flag) return "";
-  return `
-    <img
-      class="team-flag"
-      src="https://flagcdn.com/w40/${team.flag}.png"
-      srcset="https://flagcdn.com/w80/${team.flag}.png 2x"
-      width="24"
-      height="18"
-      alt=""
-      aria-hidden="true"
-    >
-  `;
+  return `<img class="team-flag" src="https://flagcdn.com/w40/${team.flag}.png" srcset="https://flagcdn.com/w80/${team.flag}.png 2x" width="24" height="18" alt="" aria-hidden="true">`;
 }
 
 function createTeamLabel(team, side = "left", variant = "") {
@@ -347,125 +238,211 @@ function createTeamLabel(team, side = "left", variant = "") {
     const sideClass = side === "right" ? " team-label-right" : "";
     return `<span class="team-label${sideClass}${variantClass}">${flag}<span>${team.name}</span></span>`;
   }
-
   return side === "right"
     ? `<span class="team-label team-label-right${variantClass}"><span>${team.name}</span>${flag}</span>`
     : `<span class="team-label${variantClass}">${flag}<span>${team.name}</span></span>`;
 }
 
-function isPlayed(match) {
-  return match.homeGoals !== "" && match.awayGoals !== "";
-}
-
-function toNumber(value) {
-  if (value === "") return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
+function isPlayed(match) { return match.homeGoals !== "" && match.awayGoals !== ""; }
+function toNumber(value) { if (value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
 
 function formatKickoff(value) {
   if (!value) return "Data a definir";
   const [date, time] = value.split("T");
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}, ${time} BRT`;
+  const [y, m, d] = date.split("-");
+  return `${d}/${m}/${y}, ${time} BRT`;
 }
 
-function formatKickoffTime(value) {
-  if (!value) return "--:--";
-  return value.split("T")[1];
-}
+function formatKickoffTime(value) { return value ? value.split("T")[1] : "--:--"; }
 
 function getTodayDateBrt() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((p) => [p.type, p.value]));
   return `${values.year}-${values.month}-${values.day}`;
 }
 
 function formatDateLongBrt(dateValue) {
-  const [year, month, day] = dateValue.split("-").map(Number);
-  return new Intl.DateTimeFormat("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  }).format(new Date(Date.UTC(year, month - 1, day, 12, 0, 0)));
+  const [y, m, d] = dateValue.split("-").map(Number);
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "long", day: "2-digit", month: "long" }).format(new Date(Date.UTC(y, m-1, d, 12, 0, 0)));
 }
 
+function formatKnockoutDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", month: "short", day: "numeric" }).format(new Date(`${value}:00-03:00`));
+}
+
+// ---------- Group Standings ----------
 function getStandings(groupId) {
   const group = state.groups.find((item) => item.id === groupId);
-  const rows = group.teams.map((team) => ({
-    ...team,
-    groupId,
-    played: 0,
-    wins: 0,
-    draws: 0,
-    losses: 0,
-    goalsFor: 0,
-    goalsAgainst: 0,
-    goalDifference: 0,
-    points: 0,
-  }));
+  const rows = group.teams.map((team) => ({ ...team, groupId, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0 }));
+  const rowByTeam = new Map(rows.map((r) => [r.id, r]));
 
-  const rowByTeam = new Map(rows.map((row) => [row.id, row]));
-
-  state.matches
-    .filter((match) => match.groupId === groupId && isPlayed(match))
-    .forEach((match) => {
-      const home = rowByTeam.get(match.homeId);
-      const away = rowByTeam.get(match.awayId);
-      const homeGoals = toNumber(match.homeGoals);
-      const awayGoals = toNumber(match.awayGoals);
-
-      home.played += 1;
-      away.played += 1;
-      home.goalsFor += homeGoals;
-      home.goalsAgainst += awayGoals;
-      away.goalsFor += awayGoals;
-      away.goalsAgainst += homeGoals;
-
-      if (homeGoals > awayGoals) {
-        home.wins += 1;
-        home.points += 3;
-        away.losses += 1;
-      } else if (homeGoals < awayGoals) {
-        away.wins += 1;
-        away.points += 3;
-        home.losses += 1;
-      } else {
-        home.draws += 1;
-        away.draws += 1;
-        home.points += 1;
-        away.points += 1;
-      }
-    });
-
-  rows.forEach((row) => {
-    row.goalDifference = row.goalsFor - row.goalsAgainst;
+  state.matches.filter((m) => m.groupId === groupId && isPlayed(m)).forEach((match) => {
+    const home = rowByTeam.get(match.homeId);
+    const away = rowByTeam.get(match.awayId);
+    const hg = toNumber(match.homeGoals);
+    const ag = toNumber(match.awayGoals);
+    home.played++; away.played++;
+    home.goalsFor += hg; home.goalsAgainst += ag;
+    away.goalsFor += ag; away.goalsAgainst += hg;
+    if (hg > ag) { home.wins++; home.points += 3; away.losses++; }
+    else if (hg < ag) { away.wins++; away.points += 3; home.losses++; }
+    else { home.draws++; away.draws++; home.points++; away.points++; }
   });
-
+  rows.forEach((r) => { r.goalDifference = r.goalsFor - r.goalsAgainst; });
   return rows.sort(compareRows);
 }
 
 function compareRows(a, b) {
-  return (
-    b.points - a.points ||
-    b.goalDifference - a.goalDifference ||
-    b.goalsFor - a.goalsFor ||
-    a.goalsAgainst - b.goalsAgainst ||
-    a.name.localeCompare(b.name, "pt-BR")
-  );
+  return b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor || a.goalsAgainst - b.goalsAgainst || a.name.localeCompare(b.name, "pt-BR");
 }
 
 function getThirdPlaceRanking() {
-  return state.groups
-    .map((group) => getStandings(group.id)[2])
-    .filter(Boolean)
-    .sort(compareRows);
+  return state.groups.map((group) => getStandings(group.id)[2]).filter(Boolean).sort(compareRows);
+}
+
+// ---------- Knockout Winner Resolution ----------
+function getKnockoutWinner(matchId) {
+  const result = allResults[matchId];
+  if (!result || !result.final) return null;
+  const scheduleMatch = findKnockoutMatch(matchId);
+  if (!scheduleMatch) return null;
+  const homeName = result.homeName || scheduleMatch.home;
+  const awayName = result.awayName || scheduleMatch.away;
+  if (result.homeGoals > result.awayGoals) return { name: homeName, flag: countryFlags[homeName] || "" };
+  if (result.awayGoals > result.homeGoals) return { name: awayName, flag: countryFlags[awayName] || "" };
+  return null; // draw shouldn't happen in knockout
+}
+
+function getKnockoutLoser(matchId) {
+  const result = allResults[matchId];
+  if (!result || !result.final) return null;
+  const scheduleMatch = findKnockoutMatch(matchId);
+  if (!scheduleMatch) return null;
+  const homeName = result.homeName || scheduleMatch.home;
+  const awayName = result.awayName || scheduleMatch.away;
+  if (result.homeGoals < result.awayGoals) return { name: homeName, flag: countryFlags[homeName] || "" };
+  if (result.awayGoals < result.homeGoals) return { name: awayName, flag: countryFlags[awayName] || "" };
+  return null;
+}
+
+function findKnockoutMatch(matchId) {
+  for (const round of Object.values(knockoutSchedule.rounds || {})) {
+    const found = round.matches.find((m) => m.id === matchId);
+    if (found) return found;
+  }
+  return null;
+}
+
+function resolveKnockoutTeam(matchId, side) {
+  // First try: actual winner propagated from earlier round
+  const connections = roundConnections[matchId];
+  if (connections) {
+    const sourceId = side === "home" ? connections[0] : connections[1];
+    const sourceMatchId = allResults[sourceId] ? sourceId : null;
+    if (sourceMatchId) {
+      if (matchId === "3RD") {
+        const loser = getKnockoutLoser(sourceMatchId);
+        if (loser) return { name: loser.name, flag: loser.flag, resolved: true };
+      } else {
+        const winner = getKnockoutWinner(sourceMatchId);
+        if (winner) return { name: winner.name, flag: winner.flag, resolved: true };
+      }
+    }
+  }
+  // Second try: scheduled team from knockout-schedule.json
+  const scheduleMatch = findKnockoutMatch(matchId);
+  if (scheduleMatch) {
+    const name = scheduleMatch[side];
+    if (name) return { name, flag: countryFlags[name] || "", resolved: true };
+  }
+  // Fallback
+  return { name: "A definir", flag: "", resolved: false };
+}
+
+// ---------- Render: Knockout ----------
+function renderKnockout() {
+  const strip = document.querySelector("#qualifiedStrip");
+  const bracket = document.querySelector("#knockoutBracket");
+  if (!strip || !bracket) return;
+
+  // Qualified strip
+  const snapshot = getQualificationSnapshot();
+  const qualifiedTeams = [];
+  state.groups.forEach((group) => {
+    const gs = snapshot.groups.get(group.id);
+    if (!gs) return;
+    qualifiedTeams.push({ ...gs.winner, qualificationLabel: `1º ${group.id}` });
+    qualifiedTeams.push({ ...gs.runnerUp, qualificationLabel: `2º ${group.id}` });
+    if (gs.thirdQualified) qualifiedTeams.push({ ...gs.third, qualificationLabel: `3º ${group.id}` });
+  });
+
+  strip.innerHTML = qualifiedTeams.map((t) =>
+    `<span class="qualified-team"><strong>${t.qualificationLabel}</strong>${createTeamLabel(t)}</span>`
+  ).join("");
+
+  // Bracket
+  bracket.innerHTML = "";
+  bracket.append(createBracketSide("left"));
+  bracket.append(createBracketCenter());
+  bracket.append(createBracketSide("right"));
+}
+
+function createBracketSide(side) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `bracket-side bracket-side-${side}`;
+  const layout = knockoutTree[side];
+
+  for (const [round, matchIds] of Object.entries(layout)) {
+    const column = document.createElement("article");
+    column.className = `bracket-round bracket-round-${round.toLowerCase()}`;
+    column.innerHTML = `<h3>${round}</h3><div class="bracket-matches"></div>`;
+    const matchesEl = column.querySelector(".bracket-matches");
+    matchIds.forEach((id) => matchesEl.append(createBracketMatch(id)));
+    wrapper.append(column);
+  }
+  return wrapper;
+}
+
+function createBracketCenter() {
+  const center = document.createElement("div");
+  center.className = "bracket-center";
+  center.innerHTML = `<div class="trophy-mark" aria-hidden="true">2026</div><div class="center-stack"></div>`;
+  const stack = center.querySelector(".center-stack");
+  stack.append(createBracketMatch("FINAL", "final-match"));
+  stack.append(createBracketMatch("3RD", "bronze-match"));
+  return center;
+}
+
+function createBracketMatch(matchId, extraClass = "") {
+  const result = allResults[matchId];
+  const scheduleMatch = findKnockoutMatch(matchId);
+  const card = document.createElement("div");
+  card.className = `bracket-match ${extraClass}`.trim();
+
+  const home = resolveKnockoutTeam(matchId, "home");
+  const away = resolveKnockoutTeam(matchId, "away");
+  const played = result && result.final;
+
+  const homeScore = played ? result.homeGoals : "-";
+  const awayScore = played ? result.awayGoals : "-";
+  const homeWinner = played && result.homeGoals > result.awayGoals;
+  const awayWinner = played && result.awayGoals > result.homeGoals;
+
+  const dateLabel = scheduleMatch ? formatKnockoutDate(scheduleMatch.scheduledAtBrt) : "";
+
+  card.innerHTML = `
+    <div class="match-number">${matchId}${dateLabel ? ` · ${dateLabel}` : ""}</div>
+    <div class="bracket-team ${home.resolved ? "resolved" : ""}${homeWinner ? " winner" : ""}">
+      ${home.flag ? createTeamLabel({ flag: home.flag, name: home.name }) : `<span>${home.name}</span>`}
+      <span class="bracket-score">${homeScore}</span>
+    </div>
+    <div class="bracket-team ${away.resolved ? "resolved" : ""}${awayWinner ? " winner" : ""}">
+      ${away.flag ? createTeamLabel({ flag: away.flag, name: away.name }) : `<span>${away.name}</span>`}
+      <span class="bracket-score">${awayScore}</span>
+    </div>
+  `;
+  return card;
 }
 
 function getQualificationSnapshot() {
@@ -482,100 +459,30 @@ function getQualificationSnapshot() {
       thirdQualified: standings[2] ? qualifiedThirdIds.has(standings[2].id) : false,
     });
   });
-
-  return {
-    groups,
-    thirdRanking,
-    qualifiedThirdIds,
-  };
+  return { groups, thirdRanking, qualifiedThirdIds };
 }
 
-function getQualifiedTeams(snapshot = getQualificationSnapshot()) {
-  const teams = [];
-
-  state.groups.forEach((group) => {
-    const groupSnapshot = snapshot.groups.get(group.id);
-    if (!groupSnapshot) return;
-    teams.push({ ...groupSnapshot.winner, qualificationLabel: `1º ${group.id}` });
-    teams.push({ ...groupSnapshot.runnerUp, qualificationLabel: `2º ${group.id}` });
-    if (groupSnapshot.thirdQualified) {
-      teams.push({ ...groupSnapshot.third, qualificationLabel: `3º ${group.id}` });
-    }
+// ---------- Render: Third Places ----------
+function renderThirdPlaces() {
+  const tbody = document.querySelector("#thirdPlaces");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  getThirdPlaceRanking().forEach((row, index) => {
+    const tr = document.createElement("tr");
+    tr.className = index < 8 ? "third-qualified" : "";
+    tr.innerHTML = `
+      <td><span class="rank-badge ${index < 8 ? "" : "out"}">${index + 1}</span></td>
+      <td>Grupo ${row.groupId}</td>
+      <td>${createTeamLabel(row)}</td>
+      <td><strong>${row.points}</strong></td>
+      <td>${row.played}</td><td>${row.wins}</td><td>${row.draws}</td><td>${row.losses}</td>
+      <td>${row.goalsFor}</td><td>${row.goalsAgainst}</td><td>${row.goalDifference}</td>
+    `;
+    tbody.append(tr);
   });
-
-  return teams;
 }
 
-function resolveSeed(seed, snapshot) {
-  if (seed.type === "winner") {
-    const team = snapshot.groups.get(seed.group)?.winner;
-    return {
-      label: team?.name || `1º Grupo ${seed.group}`,
-      flag: team?.flag || "",
-      meta: `1º Grupo ${seed.group}`,
-      resolved: Boolean(team),
-    };
-  }
-
-  if (seed.type === "runnerUp") {
-    const team = snapshot.groups.get(seed.group)?.runnerUp;
-    return {
-      label: team?.name || `2º Grupo ${seed.group}`,
-      flag: team?.flag || "",
-      meta: `2º Grupo ${seed.group}`,
-      resolved: Boolean(team),
-    };
-  }
-
-  if (seed.type === "third") {
-    const candidates = seed.groups
-      .map((groupId) => snapshot.groups.get(groupId))
-      .filter((group) => group?.thirdQualified)
-      .map((group) => group.third);
-
-    if (candidates.length === 1) {
-      return {
-        label: candidates[0].name,
-        flag: candidates[0].flag || "",
-        meta: `3º Grupo ${candidates[0].groupId}`,
-        resolved: true,
-      };
-    }
-
-    return {
-      label: `3º de ${seed.groups.join("/")}`,
-      flag: "",
-      meta: candidates.length ? `${candidates.length} opções qualificadas` : "melhor terceiro",
-      resolved: false,
-    };
-  }
-
-  if (seed.type === "matchWinner") {
-    return {
-      label: `Vencedor Jogo ${seed.match}`,
-      flag: "",
-      meta: "mata-mata",
-      resolved: false,
-    };
-  }
-
-  if (seed.type === "matchLoser") {
-    return {
-      label: `Perdedor Jogo ${seed.match}`,
-      flag: "",
-      meta: "disputa 3º lugar",
-      resolved: false,
-    };
-  }
-
-  return {
-    label: "A definir",
-    flag: "",
-    meta: "",
-    resolved: false,
-  };
-}
-
+// ---------- Render: Groups ----------
 function createStandingsTable(groupId) {
   const table = document.createElement("table");
   const standings = getStandings(groupId);
@@ -583,21 +490,9 @@ function createStandingsTable(groupId) {
   const qualifiedThirdIds = new Set(thirdRanking.slice(0, 8).map((row) => row.id));
 
   table.innerHTML = `
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Selecao</th>
-        <th>Pts</th>
-        <th>J</th>
-        <th>V</th>
-        <th>E</th>
-        <th>D</th>
-        <th>GP</th>
-        <th>GC</th>
-        <th>SG</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
+    <thead><tr>
+      <th>#</th><th>Selecao</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th>
+    </tr></thead><tbody></tbody>
   `;
 
   const tbody = table.querySelector("tbody");
@@ -607,29 +502,18 @@ function createStandingsTable(groupId) {
     if (index === 2 && qualifiedThirdIds.has(row.id)) tr.classList.add("third-qualified");
 
     tr.innerHTML = `
-      <td>${index + 1}</td>
-      <td></td>
+      <td>${index + 1}</td><td></td>
       <td><strong>${row.points}</strong></td>
-      <td>${row.played}</td>
-      <td>${row.wins}</td>
-      <td>${row.draws}</td>
-      <td>${row.losses}</td>
-      <td>${row.goalsFor}</td>
-      <td>${row.goalsAgainst}</td>
-      <td>${row.goalDifference}</td>
+      <td>${row.played}</td><td>${row.wins}</td><td>${row.draws}</td><td>${row.losses}</td>
+      <td>${row.goalsFor}</td><td>${row.goalsAgainst}</td><td>${row.goalDifference}</td>
     `;
 
     const input = document.createElement("input");
     input.className = "team-name";
     input.value = row.name;
     input.setAttribute("aria-label", `Nome da selecao ${row.id}`);
-    input.addEventListener("input", () => {
-      getTeam(row.id).name = input.value;
-    });
-    input.addEventListener("blur", () => {
-      saveState();
-      render();
-    });
+    input.addEventListener("input", () => { getTeam(row.id).name = input.value; });
+    input.addEventListener("blur", () => { saveState(); render(); });
     const teamCell = document.createElement("div");
     teamCell.className = "team-input";
     teamCell.innerHTML = createFlag(row);
@@ -637,14 +521,13 @@ function createStandingsTable(groupId) {
     tr.children[1].append(teamCell);
     tbody.append(tr);
   });
-
   return table;
 }
 
 function createMatch(match) {
   const home = getTeam(match.homeId);
   const away = getTeam(match.awayId);
-  const apiResult = remoteResults.matches?.[match.id];
+  const apiResult = allResults[match.id];
   const statusLabel = apiResult?.final ? "Resultado oficial" : "Aguardando resultado";
   const div = document.createElement("div");
   div.className = "match";
@@ -669,7 +552,6 @@ function createMatch(match) {
   awayInput.disabled = Boolean(apiResult?.final);
   homeInput.addEventListener("input", () => updateScore(match.id, "homeGoals", homeInput.value));
   awayInput.addEventListener("input", () => updateScore(match.id, "awayGoals", awayInput.value));
-
   return div;
 }
 
@@ -686,13 +568,13 @@ function matchesFilter(match) {
   const onlyPlayed = showOnlyPlayedEl.checked;
   const homeName = getTeam(match.homeId).name.toLocaleLowerCase("pt-BR");
   const awayName = getTeam(match.awayId).name.toLocaleLowerCase("pt-BR");
-
   if (selectedGroup !== "all" && match.groupId !== selectedGroup) return false;
   if (onlyPlayed && !isPlayed(match)) return false;
   if (query && !homeName.includes(query) && !awayName.includes(query)) return false;
   return true;
 }
 
+// ---------- Main Render ----------
 function render() {
   groupsEl.innerHTML = "";
   const template = document.querySelector("#groupTemplate");
@@ -706,24 +588,35 @@ function render() {
   visibleGroups.forEach((group) => {
     const node = template.content.cloneNode(true);
     const card = node.querySelector(".group-card");
-    const matches = state.matches
-      .filter((match) => match.groupId === group.id && matchesFilter(match))
-      .sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
+    const matches = state.matches.filter((m) => m.groupId === group.id && matchesFilter(m)).sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
 
     card.querySelector("h2").textContent = `Grupo ${group.id}`;
-    card.querySelector(".group-heading span").textContent = `${matches.length} jogos visiveis`;
+    card.querySelector(".group-heading span").textContent = `${matches.length} jogos`;
+
+    // Standings
     card.querySelector(".standings-wrap").append(createStandingsTable(group.id));
 
+    // Matches with collapse toggle
     const matchesEl = card.querySelector(".matches");
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "toggle-matches";
+    toggleBtn.textContent = "▶ Mostrar jogos";
+    toggleBtn.addEventListener("click", () => {
+      const expanded = matchesEl.classList.toggle("expanded");
+      toggleBtn.textContent = expanded ? "▼ Ocultar jogos" : "▶ Mostrar jogos";
+    });
+
     if (matches.length) {
       matches.forEach((match) => matchesEl.append(createMatch(match)));
     } else {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "Nenhum jogo encontrado com os filtros atuais.";
+      empty.textContent = "Nenhum jogo encontrado.";
       matchesEl.append(empty);
     }
 
+    card.querySelector(".group-content").append(toggleBtn);
     groupsEl.append(node);
   });
 
@@ -737,45 +630,12 @@ function render() {
   renderSummary();
 }
 
-function renderThirdPlaces() {
-  const tbody = document.querySelector("#thirdPlaces");
-  tbody.innerHTML = "";
-
-  getThirdPlaceRanking().forEach((row, index) => {
-    const tr = document.createElement("tr");
-    tr.className = index < 8 ? "third-qualified" : "";
-    tr.innerHTML = `
-      <td><span class="rank-badge ${index < 8 ? "" : "out"}">${index + 1}</span></td>
-      <td>Grupo ${row.groupId}</td>
-      <td>${createTeamLabel(row)}</td>
-      <td><strong>${row.points}</strong></td>
-      <td>${row.played}</td>
-      <td>${row.wins}</td>
-      <td>${row.draws}</td>
-      <td>${row.losses}</td>
-      <td>${row.goalsFor}</td>
-      <td>${row.goalsAgainst}</td>
-      <td>${row.goalDifference}</td>
-    `;
-    tbody.append(tr);
-  });
-}
-
 function renderSummary() {
   const played = state.matches.filter(isPlayed);
-  const goals = played.reduce(
-    (total, match) => total + toNumber(match.homeGoals) + toNumber(match.awayGoals),
-    0,
-  );
-
+  const goals = played.reduce((total, match) => total + toNumber(match.homeGoals) + toNumber(match.awayGoals), 0);
   document.querySelector("#playedMatches").textContent = played.length;
   document.querySelector("#totalGoals").textContent = goals;
-  document.querySelector("#averageGoals").textContent = played.length
-    ? (goals / played.length).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    : "0,00";
+  document.querySelector("#averageGoals").textContent = played.length ? (goals / played.length).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00";
   document.querySelector("#qualifiedCount").textContent = 32;
 }
 
@@ -785,29 +645,22 @@ function renderTodayMatches() {
   if (!container || !label) return;
 
   const today = getTodayDateBrt();
-  const matches = state.matches
-    .filter((match) => match.scheduledAt?.startsWith(today))
-    .sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
+  const matches = state.matches.filter((m) => m.scheduledAt?.startsWith(today)).sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
 
   label.textContent = `${formatDateLongBrt(today)} - Horário de Brasília`;
   container.innerHTML = "";
-
   if (!matches.length) {
-    const empty = document.createElement("div");
-    empty.className = "today-empty";
-    empty.textContent = "Nenhum jogo programado para hoje.";
-    container.append(empty);
+    container.innerHTML = `<div class="today-empty">Nenhum jogo programado para hoje.</div>`;
     return;
   }
 
   matches.forEach((match) => {
     const home = getTeam(match.homeId);
     const away = getTeam(match.awayId);
-    const apiResult = remoteResults.matches?.[match.id];
+    const apiResult = allResults[match.id];
     const played = isPlayed(match);
     const card = document.createElement("article");
     card.className = `today-match ${apiResult?.final ? "today-match-final" : ""}`.trim();
-
     card.innerHTML = `
       <div class="today-time">${formatKickoffTime(match.scheduledAt)}</div>
       <div class="today-game">
@@ -815,96 +668,10 @@ function renderTodayMatches() {
         <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
         <div class="today-team today-team-away">${createTeamLabel(away, "right", "stacked")}</div>
       </div>
-      <div class="today-meta">
-        <span>Grupo ${match.groupId}</span>
-        <em>${apiResult?.final ? "Resultado oficial" : "Programado"}</em>
-      </div>
+      <div class="today-meta"><span>Grupo ${match.groupId}</span><em>${apiResult?.final ? "Resultado oficial" : "Programado"}</em></div>
     `;
-
     container.append(card);
   });
-}
-
-function renderKnockout() {
-  const strip = document.querySelector("#qualifiedStrip");
-  const bracket = document.querySelector("#knockoutBracket");
-  if (!strip || !bracket) return;
-
-  const snapshot = getQualificationSnapshot();
-  const qualifiedTeams = getQualifiedTeams(snapshot);
-
-  strip.innerHTML = "";
-  bracket.innerHTML = "";
-
-  qualifiedTeams.forEach((team) => {
-    const badge = document.createElement("span");
-    badge.className = "qualified-team";
-    badge.innerHTML = `<strong>${team.qualificationLabel}</strong>${createTeamLabel(team)}`;
-    strip.append(badge);
-  });
-
-  bracket.append(createBracketSide("left", snapshot));
-  bracket.append(createBracketCenter(snapshot));
-  bracket.append(createBracketSide("right", snapshot));
-}
-
-function createBracketSide(side, snapshot) {
-  const wrapper = document.createElement("div");
-  wrapper.className = `bracket-side bracket-side-${side}`;
-
-  bracketLayout[side].forEach((round) => {
-    const column = document.createElement("article");
-    column.className = `bracket-round bracket-round-${round.title.toLowerCase()}`;
-    column.innerHTML = `<h3>${round.title}</h3><div class="bracket-matches"></div>`;
-    const matchesEl = column.querySelector(".bracket-matches");
-
-    round.matches.forEach((matchId) => {
-      matchesEl.append(createBracketMatch(matchId, snapshot));
-    });
-
-    wrapper.append(column);
-  });
-
-  return wrapper;
-}
-
-function createBracketCenter(snapshot) {
-  const center = document.createElement("div");
-  center.className = "bracket-center";
-  center.innerHTML = `
-    <div class="trophy-mark" aria-hidden="true">2026</div>
-    <div class="center-stack"></div>
-  `;
-
-  const stack = center.querySelector(".center-stack");
-  stack.append(createBracketMatch(104, snapshot, "final-match"));
-  stack.append(createBracketMatch(103, snapshot, "bronze-match"));
-
-  return center;
-}
-
-function createBracketMatch(matchId, snapshot, extraClass = "") {
-  const match = knockoutMatchById.get(matchId);
-  const home = resolveSeed(match.home, snapshot);
-  const away = resolveSeed(match.away, snapshot);
-  const card = document.createElement("div");
-  card.className = `bracket-match ${extraClass}`.trim();
-  card.innerHTML = `
-    <div class="match-number">Jogo ${match.id}</div>
-    ${createBracketTeam(home)}
-    ${createBracketTeam(away)}
-  `;
-  return card;
-}
-
-function createBracketTeam(seed) {
-  const label = seed.flag ? createTeamLabel({ flag: seed.flag, name: seed.label }) : seed.label;
-  return `
-    <div class="bracket-team ${seed.resolved ? "resolved" : ""}">
-      <span>${label}</span>
-      <small>${seed.meta}</small>
-    </div>
-  `;
 }
 
 function populateGroupFilter() {
@@ -916,18 +683,11 @@ function populateGroupFilter() {
   });
 }
 
-document.querySelector("#saveButton").addEventListener("click", () => {
-  saveState();
-  alert("Tabela salva neste navegador.");
-});
-
+// ---------- Init ----------
+document.querySelector("#saveButton").addEventListener("click", () => { saveState(); alert("Tabela salva neste navegador."); });
 document.querySelector("#resetButton").addEventListener("click", () => {
-  state.matches.forEach((match) => {
-    match.homeGoals = "";
-    match.awayGoals = "";
-  });
-  saveState();
-  render();
+  state.matches.forEach((m) => { m.homeGoals = ""; m.awayGoals = ""; });
+  saveState(); render();
 });
 
 [groupFilterEl, teamSearchEl, showOnlyPlayedEl].forEach((control) => {
@@ -937,4 +697,4 @@ document.querySelector("#resetButton").addEventListener("click", () => {
 
 populateGroupFilter();
 render();
-loadRemoteResults();
+loadAllData();
