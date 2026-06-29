@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-06-29T11:36:09.883Z",
+  "updatedAt": "2026-06-29T11:59:39.360Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -583,7 +583,7 @@
       "final": true,
       "homeGoals": 0,
       "awayGoals": 1,
-      "checkedAt": "2026-06-29T11:36:09.883Z",
+      "checkedAt": "2026-06-29T11:59:39.360Z",
       "homeName": "Africa do Sul",
       "awayName": "Canadá",
       "source": "manual"
