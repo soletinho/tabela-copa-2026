@@ -392,12 +392,17 @@ function createBracketSide(side) {
   const wrapper = document.createElement("div");
   wrapper.className = `bracket-side bracket-side-${side}`;
   const layout = knockoutTree[side];
-  const entries = Object.entries(layout);
 
-  // Right side: reverse so SF → center, R32 → edge
-  const ordered = side === "right" ? entries.reverse() : entries;
+  // Column order: both sides fan out from center
+  // Left:  R32 → R16 → QF → SF  (left-to-right, converging toward center)
+  // Right: SF  → QF  → R16 → R32 (left-to-right, converging toward center = mirrored)
+  const roundOrder = side === "right"
+    ? ["SF", "QF", "R16", "R32"]
+    : ["R32", "R16", "QF", "SF"];
 
-  for (const [round, matchIds] of ordered) {
+  for (const round of roundOrder) {
+    const matchIds = layout[round];
+    if (!matchIds) continue;
     const column = document.createElement("article");
     column.className = `bracket-round bracket-round-${round.toLowerCase()}`;
     column.innerHTML = `<h3>${round}</h3><div class="bracket-matches"></div>`;
