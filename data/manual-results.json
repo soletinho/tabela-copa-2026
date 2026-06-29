@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-06-29T19:33:10.352Z",
+  "updatedAt": "2026-06-29T23:51:24.374Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -509,6 +509,15 @@
       "checkedAt": "2026-06-29T19:33:10.352Z",
       "homeName": "Brasil",
       "awayName": "Japão"
+    },
+    "R32-3": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 1,
+      "awayGoals": 1,
+      "checkedAt": "2026-06-29T23:51:24.374Z",
+      "homeName": "Alemanha",
+      "awayName": "Paraguai"
     }
   }
 }
