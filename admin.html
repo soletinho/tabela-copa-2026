@@ -49,12 +49,32 @@
 
         <div class="form-grid">
           <label>
+            Fase
+            <select id="phaseSelect">
+              <option value="groups">Fase de Grupos</option>
+              <option value="R32">16avos de Final</option>
+              <option value="R16">Oitavas de Final</option>
+              <option value="QF">Quartas de Final</option>
+              <option value="SF">Semifinais</option>
+              <option value="3RD">3º Lugar</option>
+              <option value="FINAL">Final</option>
+            </select>
+          </label>
+          <label id="groupLabel">
             Grupo
             <select id="groupSelect"></select>
           </label>
           <label>
             Partida
             <select id="matchSelect"></select>
+          </label>
+          <label id="knockoutHomeLabel" class="knockout-team" hidden>
+            Time mandante
+            <input id="knockoutHomeInput" type="text" placeholder="Nome do time..." />
+          </label>
+          <label id="knockoutAwayLabel" class="knockout-team" hidden>
+            Time visitante
+            <input id="knockoutAwayInput" type="text" placeholder="Nome do time..." />
           </label>
           <label>
             Gols mandante

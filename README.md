@@ -1,6 +1,6 @@
 # Tabela interativa da Copa 2026
 
-Site estático em HTML, CSS e JavaScript para acompanhar a fase de grupos da Copa do Mundo 2026.
+Site estático em HTML, CSS e JavaScript para acompanhar a fase de grupos e mata-mata da Copa do Mundo 2026.
 
 ## Publicação
 
@@ -8,32 +8,34 @@ O projeto funciona no GitHub Pages. Depois de ativar o Pages no repositório, o 
 
 https://soletinho.github.io/tabela-copa-2026/
 
-## Atualização automática de resultados
+## Atualização de resultados
 
-A automação usa GitHub Actions para consultar a API-Football e atualizar `data/results.json`.
-A página pública lê apenas esse arquivo, então a chave da API não fica exposta no navegador.
+Os resultados são atualizados manualmente por meio de uma **área administrativa**:
 
-### Configurar a chave
+https://soletinho.github.io/tabela-copa-2026/admin.html
 
-1. Crie uma conta gratuita em https://www.api-football.com/.
-2. Pegue a chave da API no dashboard.
-3. No GitHub, abra o repositório e vá em **Settings > Secrets and variables > Actions**.
-4. Clique em **New repository secret**.
-5. Use o nome `API_FOOTBALL_KEY`.
-6. Cole a chave da API no valor do secret e salve.
+A página administrativa grava os resultados nos arquivos `data/manual-results.json` e `data/results.json` diretamente no repositório via GitHub API.
 
-### Como a automação economiza chamadas
+### Como usar a área administrativa
 
-A Action roda a cada 30 minutos, mas só consulta jogos que:
+1. Acesse `admin.html`
+2. Informe um token GitHub com permissão de escrita no repositório
+3. Escolha a fase (Grupos ou Mata-Mata)
+4. Selecione a partida
+5. Informe o placar e salve
 
-- já passaram de `horário de início + 2h15`;
-- ainda não têm resultado final salvo em `data/results.json`.
+O site público lê `data/results.json` e `data/manual-results.json`, então o token da API nunca fica exposto no navegador.
 
-Quando um jogo recebe status final (`FT`, `AET` ou `PEN`), o resultado fica salvo e não é consultado de novo.
+### Fase de grupos
 
-### Variáveis opcionais
+A tabela de grupos é definida em `data/schedule.json` e os resultados em `data/results.json`.
 
-Por padrão, a automação busca fixtures por data em todas as competições. Se você quiser restringir a busca a uma competição específica da API-Football, configure em **Settings > Secrets and variables > Actions > Variables**:
+### Fase mata-mata
 
-- `API_FOOTBALL_LEAGUE_ID`: ID da competição na API-Football. Se não souber o ID correto, deixe a variável removida/vazia para buscar por data em todas as competições.
-- `API_FOOTBALL_SEASON`: padrão `2026`.
+A estrutura do mata-mata é definida em `data/knockout-schedule.json`. Para partidas do mata-mata, a área administrativa permite preencher tanto os nomes dos times quanto os placares.
+
+## Como a tabela é alimentada
+
+1. O site carrega `data/schedule.json` (grupos) e `data/knockout-schedule.json` (mata-mata)
+2. Lê `data/results.json` e `data/manual-results.json` para os placares
+3. Renderiza tudo no navegador, sem backend

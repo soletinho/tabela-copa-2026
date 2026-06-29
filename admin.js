@@ -5,20 +5,29 @@ const TOKEN_KEY = "tabela-copa-2026-admin-token";
 
 const paths = {
   schedule: "data/schedule.json",
+  knockoutSchedule: "data/knockout-schedule.json",
   manual: "data/manual-results.json",
   results: "data/results.json",
 };
 
 let schedule = { matches: [] };
+let knockoutSchedule = { rounds: {} };
 let manualResults = { source: "manual", updatedAt: null, matches: {} };
 let results = { source: "api-football", updatedAt: null, matches: {} };
+let currentKnockoutTeamNames = {};
 
 const tokenInput = document.querySelector("#tokenInput");
 const saveTokenButton = document.querySelector("#saveTokenButton");
 const clearTokenButton = document.querySelector("#clearTokenButton");
 const reloadButton = document.querySelector("#reloadButton");
+const phaseSelect = document.querySelector("#phaseSelect");
+const groupLabel = document.querySelector("#groupLabel");
 const groupSelect = document.querySelector("#groupSelect");
 const matchSelect = document.querySelector("#matchSelect");
+const knockoutHomeLabel = document.querySelector("#knockoutHomeLabel");
+const knockoutAwayLabel = document.querySelector("#knockoutAwayLabel");
+const knockoutHomeInput = document.querySelector("#knockoutHomeInput");
+const knockoutAwayInput = document.querySelector("#knockoutAwayInput");
 const homeGoalsInput = document.querySelector("#homeGoalsInput");
 const awayGoalsInput = document.querySelector("#awayGoalsInput");
 const statusSelect = document.querySelector("#statusSelect");
@@ -52,11 +61,21 @@ function bindEvents() {
   });
 
   reloadButton.addEventListener("click", loadAllData);
+
+  phaseSelect.addEventListener("change", () => {
+    onPhaseChange();
+  });
+
   groupSelect.addEventListener("change", () => {
     populateMatches();
     loadSelectedResultIntoForm();
   });
+
   matchSelect.addEventListener("change", loadSelectedResultIntoForm);
+
+  knockoutHomeInput.addEventListener("input", () => { saveKnockoutTeamNames(); updatePreview(); });
+  knockoutAwayInput.addEventListener("input", () => { saveKnockoutTeamNames(); updatePreview(); });
+
   [homeGoalsInput, awayGoalsInput, statusSelect, finalCheckbox].forEach((el) => {
     el.addEventListener("input", updatePreview);
     el.addEventListener("change", updatePreview);
@@ -65,20 +84,51 @@ function bindEvents() {
   removeResultButton.addEventListener("click", removeSelectedResult);
 }
 
+function isKnockoutPhase() {
+  return phaseSelect.value !== "groups";
+}
+
+function onPhaseChange() {
+  const knockout = isKnockoutPhase();
+  groupLabel.hidden = knockout;
+  groupSelect.hidden = knockout;
+  knockoutHomeLabel.hidden = !knockout;
+  knockoutAwayLabel.hidden = !knockout;
+
+  if (knockout) {
+    populateKnockoutMatches();
+  } else {
+    populateGroups();
+    populateMatches();
+  }
+  loadSelectedResultIntoForm();
+}
+
 async function loadAllData() {
   setBusy(true);
   showStatus("Carregando dados...", "info");
   try {
-    const [scheduleData, manualData, resultsData] = await Promise.all([
+    const [scheduleData, knockoutData, manualData, resultsData] = await Promise.all([
       fetchJson(paths.schedule),
+      fetchJson(paths.knockoutSchedule),
       fetchJson(paths.manual),
       fetchJson(paths.results),
     ]);
     schedule = scheduleData;
+    knockoutSchedule = knockoutData;
     manualResults = normalizeResultsFile(manualData, "manual");
     results = normalizeResultsFile(resultsData, "api-football");
+
+    // Restore saved knockout team names
+    const savedNames = localStorage.getItem("tabela-copa-knockout-teams");
+    currentKnockoutTeamNames = savedNames ? JSON.parse(savedNames) : {};
+
     populateGroups();
-    populateMatches();
+    if (isKnockoutPhase()) {
+      populateKnockoutMatches();
+    } else {
+      populateMatches();
+    }
     loadSelectedResultIntoForm();
     renderManualResultsList();
     showStatus("Dados carregados.", "ok");
@@ -120,11 +170,77 @@ function populateMatches() {
   if (matches.some((match) => match.id === selected)) matchSelect.value = selected;
 }
 
+function populateKnockoutMatches() {
+  const roundKey = phaseSelect.value;
+  const round = knockoutSchedule.rounds[roundKey];
+  if (!round) {
+    matchSelect.innerHTML = "<option value=\"\">Nenhuma partida encontrada</option>";
+    return;
+  }
+
+  const selected = matchSelect.value;
+  matchSelect.innerHTML = round.matches.map((match) => {
+    const home = getKnockoutTeamName(match, "home");
+    const away = getKnockoutTeamName(match, "away");
+    const label = home || away ? `${escapeHtml(home || "?")} x ${escapeHtml(away || "?")}` : "Times a definir";
+    return `<option value="${match.id}">${match.id}: ${label} — ${formatDateTime(match.scheduledAtBrt)}</option>`;
+  }).join("");
+
+  if (round.matches.some((match) => match.id === selected)) {
+    matchSelect.value = selected;
+  }
+}
+
+function getKnockoutTeamName(match, side) {
+  // First check locally saved names, then schedule
+  if (currentKnockoutTeamNames[match.id]?.[side]) {
+    return currentKnockoutTeamNames[match.id][side];
+  }
+  return match[side] || "";
+}
+
+function saveKnockoutTeamNames() {
+  const match = getSelectedKnockoutMatch();
+  if (!match) return;
+  if (!currentKnockoutTeamNames[match.id]) {
+    currentKnockoutTeamNames[match.id] = {};
+  }
+  currentKnockoutTeamNames[match.id].home = knockoutHomeInput.value.trim();
+  currentKnockoutTeamNames[match.id].away = knockoutAwayInput.value.trim();
+  localStorage.setItem("tabela-copa-knockout-teams", JSON.stringify(currentKnockoutTeamNames));
+}
+
 function getSelectedMatch() {
+  if (isKnockoutPhase()) {
+    return getSelectedKnockoutMatch();
+  }
   return schedule.matches.find((match) => match.id === matchSelect.value);
 }
 
+function getSelectedKnockoutMatch() {
+  const roundKey = phaseSelect.value;
+  const round = knockoutSchedule.rounds[roundKey];
+  if (!round) return null;
+  return round.matches.find((match) => match.id === matchSelect.value);
+}
+
 function loadSelectedResultIntoForm() {
+  const knockout = isKnockoutPhase();
+
+  if (knockout) {
+    const match = getSelectedKnockoutMatch();
+    if (!match) {
+      knockoutHomeInput.value = "";
+      knockoutAwayInput.value = "";
+      homeGoalsInput.value = "";
+      awayGoalsInput.value = "";
+      updatePreview();
+      return;
+    }
+    knockoutHomeInput.value = getKnockoutTeamName(match, "home");
+    knockoutAwayInput.value = getKnockoutTeamName(match, "away");
+  }
+
   const match = getSelectedMatch();
   if (!match) return;
 
@@ -142,11 +258,14 @@ function updatePreview() {
     matchPreview.innerHTML = "";
     return;
   }
+  const knockout = isKnockoutPhase();
+  const homeName = knockout ? (getKnockoutTeamName(match, "home") || "?") : match.home;
+  const awayName = knockout ? (getKnockoutTeamName(match, "away") || "?") : match.away;
   const homeGoals = homeGoalsInput.value === "" ? "—" : homeGoalsInput.value;
   const awayGoals = awayGoalsInput.value === "" ? "—" : awayGoalsInput.value;
   const saved = manualResults.matches[match.id];
   matchPreview.innerHTML = `
-    <strong>${escapeHtml(match.id)} — ${escapeHtml(match.home)} ${homeGoals} x ${awayGoals} ${escapeHtml(match.away)}</strong>
+    <strong>${escapeHtml(match.id)} — ${escapeHtml(homeName)} ${homeGoals} x ${awayGoals} ${escapeHtml(awayName)}</strong>
     <span>${formatDateTime(match.scheduledAtBrt)} • ${finalCheckbox.checked ? "resultado final" : "não final"} • ${escapeHtml(statusSelect.value)}</span>
     <small>${saved ? "Já existe resultado manual salvo para esta partida." : "Sem resultado manual salvo para esta partida."}</small>
   `;
@@ -155,6 +274,14 @@ function updatePreview() {
 async function saveSelectedResult() {
   const match = getSelectedMatch();
   if (!match) return showStatus("Nenhuma partida selecionada.", "error");
+
+  const knockout = isKnockoutPhase();
+  const homeName = knockout ? knockoutHomeInput.value.trim() : match.home;
+  const awayName = knockout ? knockoutAwayInput.value.trim() : match.away;
+
+  if (knockout && (!homeName || !awayName)) {
+    return showStatus("Informe os nomes dos times para partidas do mata-mata.", "error");
+  }
 
   const homeGoals = parseScore(homeGoalsInput.value, "gols do mandante");
   const awayGoals = parseScore(awayGoalsInput.value, "gols do visitante");
@@ -167,7 +294,13 @@ async function saveSelectedResult() {
     homeGoals,
     awayGoals,
     checkedAt: now,
+    homeName: knockout ? homeName : undefined,
+    awayName: knockout ? awayName : undefined,
   };
+
+  // Clean undefined keys
+  if (result.homeName === undefined) delete result.homeName;
+  if (result.awayName === undefined) delete result.awayName;
 
   manualResults.matches[match.id] = result;
   manualResults.source = "manual";
@@ -180,14 +313,21 @@ async function saveSelectedResult() {
   results.source = "api-football";
   results.updatedAt = now;
 
-  await persistFiles(`Resultado manual: ${match.id} ${match.home} ${homeGoals} x ${awayGoals} ${match.away}`);
+  if (knockout) saveKnockoutTeamNames();
+
+  await persistFiles(`Resultado manual: ${match.id} ${homeName} ${homeGoals} x ${awayGoals} ${awayName}`);
 }
 
 async function removeSelectedResult() {
   const match = getSelectedMatch();
   if (!match) return showStatus("Nenhuma partida selecionada.", "error");
   if (!manualResults.matches[match.id]) return showStatus("Esta partida não possui resultado manual salvo.", "info");
-  if (!confirm(`Remover o resultado manual de ${match.id}: ${match.home} x ${match.away}?`)) return;
+
+  const knockout = isKnockoutPhase();
+  const homeName = knockout ? (getKnockoutTeamName(match, "home") || match.id) : match.home;
+  const awayName = knockout ? (getKnockoutTeamName(match, "away") || match.id) : match.away;
+
+  if (!confirm(`Remover o resultado manual de ${match.id}: ${homeName} x ${awayName}?`)) return;
 
   const now = new Date().toISOString();
   delete manualResults.matches[match.id];
@@ -197,7 +337,7 @@ async function removeSelectedResult() {
   if (currentResult?.source === "manual") delete results.matches[match.id];
   results.updatedAt = now;
 
-  await persistFiles(`Remove resultado manual: ${match.id} ${match.home} x ${match.away}`);
+  await persistFiles(`Remove resultado manual: ${match.id} ${homeName} x ${awayName}`);
 }
 
 function parseScore(value, label) {
@@ -225,6 +365,7 @@ async function persistFiles(message) {
     await putGithubFileWithRetry(paths.results, results, message, token);
     renderManualResultsList();
     updatePreview();
+    if (isKnockoutPhase()) populateKnockoutMatches();
     showStatus("Resultado salvo no GitHub. O GitHub Pages pode levar alguns instantes para refletir a mudança.", "ok");
   } catch (error) {
     showStatus(`Erro ao salvar: ${error.message}`, "error");
@@ -316,8 +457,10 @@ function renderManualResultsList() {
   }
 
   manualResultsList.innerHTML = entries.map(([matchId, result]) => {
-    const match = schedule.matches.find((item) => item.id === matchId);
-    const label = match ? `${match.home} ${result.homeGoals} x ${result.awayGoals} ${match.away}` : `${result.homeGoals} x ${result.awayGoals}`;
+    const match = findMatchById(matchId);
+    const homeName = result.homeName || (match ? match.home : "?");
+    const awayName = result.awayName || (match ? match.away : "?");
+    const label = `${homeName} ${result.homeGoals} x ${result.awayGoals} ${awayName}`;
     return `
       <article class="result-item">
         <div>
@@ -328,6 +471,19 @@ function renderManualResultsList() {
       </article>
     `;
   }).join("");
+}
+
+function findMatchById(matchId) {
+  // Check group phase
+  const groupMatch = schedule.matches.find((m) => m.id === matchId);
+  if (groupMatch) return groupMatch;
+
+  // Check knockout
+  for (const round of Object.values(knockoutSchedule.rounds)) {
+    const koMatch = round.matches.find((m) => m.id === matchId);
+    if (koMatch) return koMatch;
+  }
+  return null;
 }
 
 function formatDateTime(value) {
