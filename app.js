@@ -623,11 +623,28 @@ function render() {
 }
 
 function renderSummary() {
-  const played = state.matches.filter(isPlayed);
-  const goals = played.reduce((total, match) => total + toNumber(match.homeGoals) + toNumber(match.awayGoals), 0);
-  document.querySelector("#playedMatches").textContent = played.length;
-  document.querySelector("#totalGoals").textContent = goals;
-  document.querySelector("#averageGoals").textContent = played.length ? (goals / played.length).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00";
+  // Group-stage played matches
+  const groupPlayed = state.matches.filter(isPlayed);
+  const groupGoals = groupPlayed.reduce((total, match) => total + toNumber(match.homeGoals) + toNumber(match.awayGoals), 0);
+
+  // Knockout played matches
+  let knockoutPlayed = 0;
+  let knockoutGoals = 0;
+  for (const [matchId, result] of Object.entries(allResults)) {
+    if (!result.final) continue;
+    if (matchId.includes("-") && matchId[0] >= "A" && matchId[0] <= "L") continue; // skip group matches
+    const koMatch = findKnockoutMatch(matchId);
+    if (!koMatch) continue;
+    knockoutPlayed++;
+    knockoutGoals += result.homeGoals + result.awayGoals;
+  }
+
+  const totalPlayed = groupPlayed.length + knockoutPlayed;
+  const totalGoals = groupGoals + knockoutGoals;
+
+  document.querySelector("#playedMatches").textContent = totalPlayed;
+  document.querySelector("#totalGoals").textContent = totalGoals;
+  document.querySelector("#averageGoals").textContent = totalPlayed ? (totalGoals / totalPlayed).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00";
   document.querySelector("#qualifiedCount").textContent = 32;
 }
 
