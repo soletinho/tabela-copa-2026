@@ -362,26 +362,9 @@ function resolveKnockoutTeam(matchId, side) {
 
 // ---------- Render: Knockout ----------
 function renderKnockout() {
-  const strip = document.querySelector("#qualifiedStrip");
   const bracket = document.querySelector("#knockoutBracket");
-  if (!strip || !bracket) return;
+  if (!bracket) return;
 
-  // Qualified strip
-  const snapshot = getQualificationSnapshot();
-  const qualifiedTeams = [];
-  state.groups.forEach((group) => {
-    const gs = snapshot.groups.get(group.id);
-    if (!gs) return;
-    qualifiedTeams.push({ ...gs.winner, qualificationLabel: `1º ${group.id}` });
-    qualifiedTeams.push({ ...gs.runnerUp, qualificationLabel: `2º ${group.id}` });
-    if (gs.thirdQualified) qualifiedTeams.push({ ...gs.third, qualificationLabel: `3º ${group.id}` });
-  });
-
-  strip.innerHTML = qualifiedTeams.map((t) =>
-    `<span class="qualified-team"><strong>${t.qualificationLabel}</strong>${createTeamLabel(t)}</span>`
-  ).join("");
-
-  // Bracket
   bracket.innerHTML = "";
   bracket.append(createBracketSide("left"));
   bracket.append(createBracketCenter());
@@ -654,30 +637,56 @@ function renderTodayMatches() {
   if (!container || !label) return;
 
   const today = getTodayDateBrt();
-  const matches = state.matches.filter((m) => m.scheduledAt?.startsWith(today)).sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""));
+
+  // Group-stage matches scheduled today
+  const groupMatches = state.matches.filter((m) => m.scheduledAt?.startsWith(today));
+
+  // Knockout matches scheduled today
+  const knockoutMatches = [];
+  for (const round of Object.values(knockoutSchedule.rounds || {})) {
+    for (const m of round.matches) {
+      if (m.scheduledAtBrt?.startsWith(today)) {
+        knockoutMatches.push(m);
+      }
+    }
+  }
+
+  const allToday = [
+    ...groupMatches.map((m) => ({ ...m, type: "group", sortTime: m.scheduledAt })),
+    ...knockoutMatches.map((m) => ({ ...m, type: "knockout", sortTime: m.scheduledAtBrt })),
+  ].sort((a, b) => (a.sortTime || "").localeCompare(b.sortTime || ""));
 
   label.textContent = `${formatDateLongBrt(today)} - Horário de Brasília`;
   container.innerHTML = "";
-  if (!matches.length) {
+
+  if (!allToday.length) {
     container.innerHTML = `<div class="today-empty">Nenhum jogo programado para hoje.</div>`;
     return;
   }
 
-  matches.forEach((match) => {
-    const home = getTeam(match.homeId);
-    const away = getTeam(match.awayId);
-    const apiResult = allResults[match.id];
-    const played = isPlayed(match);
+  allToday.forEach((match) => {
+    const result = allResults[match.id];
+    const played = result?.final || false;
+    const homeGoals = played ? result.homeGoals : "-";
+    const awayGoals = played ? result.awayGoals : "-";
+    const homeName = match.type === "knockout" ? (result?.homeName || match.home) : getTeam(match.homeId).name;
+    const awayName = match.type === "knockout" ? (result?.awayName || match.away) : getTeam(match.awayId).name;
+    const homeFlag = match.type === "knockout" ? (countryFlags[homeName] || "") : getTeam(match.homeId).flag;
+    const awayFlag = match.type === "knockout" ? (countryFlags[awayName] || "") : getTeam(match.awayId).flag;
+    const roundLabel = match.type === "knockout"
+      ? (match.id.startsWith("FINAL") ? "Final" : match.id.startsWith("3RD") ? "3º Lugar" : match.id.startsWith("SF") ? "Semifinal" : match.id.startsWith("QF") ? "Quartas" : match.id.startsWith("R16") ? "Oitavas" : "16avos")
+      : `Grupo ${match.groupId}`;
+
     const card = document.createElement("article");
-    card.className = `today-match ${apiResult?.final ? "today-match-final" : ""}`.trim();
+    card.className = `today-match ${played ? "today-match-final" : ""}`.trim();
     card.innerHTML = `
-      <div class="today-time">${formatKickoffTime(match.scheduledAt)}</div>
+      <div class="today-time">${formatKickoffTime(match.sortTime)}</div>
       <div class="today-game">
-        <div class="today-team today-team-home">${createTeamLabel(home, "left", "stacked")}</div>
-        <strong>${played ? `${match.homeGoals} x ${match.awayGoals}` : "x"}</strong>
-        <div class="today-team today-team-away">${createTeamLabel(away, "right", "stacked")}</div>
+        <div class="today-team today-team-home">${createTeamLabel({ flag: homeFlag, name: homeName }, "left", "stacked")}</div>
+        <strong>${played ? `${homeGoals} x ${awayGoals}` : "x"}</strong>
+        <div class="today-team today-team-away">${createTeamLabel({ flag: awayFlag, name: awayName }, "right", "stacked")}</div>
       </div>
-      <div class="today-meta"><span>Grupo ${match.groupId}</span><em>${apiResult?.final ? "Resultado oficial" : "Programado"}</em></div>
+      <div class="today-meta"><span>${roundLabel}</span><em>${played ? "Resultado oficial" : "Programado"}</em></div>
     `;
     container.append(card);
   });
