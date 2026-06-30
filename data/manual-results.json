@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-06-30T03:55:11.104Z",
+  "updatedAt": "2026-06-30T03:56:03.945Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -515,18 +515,22 @@
       "final": true,
       "homeGoals": 1,
       "awayGoals": 1,
-      "checkedAt": "2026-06-29T23:51:24.374Z",
+      "checkedAt": "2026-06-30T00:15:01.943Z",
       "homeName": "Alemanha",
-      "awayName": "Paraguai"
+      "awayName": "Paraguai",
+      "homePenGoals": 3,
+      "awayPenGoals": 4
     },
     "R32-2": {
       "status": "FT",
       "final": true,
       "homeGoals": 1,
       "awayGoals": 1,
-      "checkedAt": "2026-06-30T03:55:11.104Z",
+      "checkedAt": "2026-06-30T03:56:03.945Z",
       "homeName": "Holanda",
-      "awayName": "Marrocos"
+      "awayName": "Marrocos",
+      "homePenGoals": 2,
+      "awayPenGoals": 3
     }
   }
 }
