@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-01T09:10:07.398Z",
+  "updatedAt": "2026-07-01T18:00:48.600Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -549,6 +549,15 @@
       "checkedAt": "2026-07-01T09:10:07.398Z",
       "homeName": "México",
       "awayName": "Equador"
+    },
+    "R32-12": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 1,
+      "checkedAt": "2026-07-01T18:00:48.600Z",
+      "homeName": "Inglaterra",
+      "awayName": "RD Congo"
     }
   }
 }
