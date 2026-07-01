@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-06-30T18:58:55.662Z",
+  "updatedAt": "2026-07-01T09:10:07.398Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -630,6 +630,16 @@
       "checkedAt": "2026-06-30T18:58:55.662Z",
       "homeName": "Costa do Marfim",
       "awayName": "Noruega",
+      "source": "manual"
+    },
+    "R32-11": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-01T09:10:07.398Z",
+      "homeName": "México",
+      "awayName": "Equador",
       "source": "manual"
     }
   }
