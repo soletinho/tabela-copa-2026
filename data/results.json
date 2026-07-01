@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-07-01T09:10:07.398Z",
+  "updatedAt": "2026-07-01T18:00:48.600Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -640,6 +640,16 @@
       "checkedAt": "2026-07-01T09:10:07.398Z",
       "homeName": "México",
       "awayName": "Equador",
+      "source": "manual"
+    },
+    "R32-12": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 1,
+      "checkedAt": "2026-07-01T18:00:48.600Z",
+      "homeName": "Inglaterra",
+      "awayName": "RD Congo",
       "source": "manual"
     }
   }
