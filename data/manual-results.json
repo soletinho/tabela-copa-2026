@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-01T22:51:10.546Z",
+  "updatedAt": "2026-07-02T09:55:02.160Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -567,6 +567,15 @@
       "checkedAt": "2026-07-01T22:51:10.546Z",
       "homeName": "Bélgica",
       "awayName": "Senegal"
+    },
+    "R32-6": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-02T09:55:02.160Z",
+      "homeName": "Estados Unidos",
+      "awayName": "Bósnia"
     }
   }
 }
