@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-07-02T09:55:02.160Z",
+  "updatedAt": "2026-07-02T20:52:04.356Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -670,6 +670,16 @@
       "checkedAt": "2026-07-02T09:55:02.160Z",
       "homeName": "Estados Unidos",
       "awayName": "Bósnia",
+      "source": "manual"
+    },
+    "R32-7": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 3,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-02T20:52:04.356Z",
+      "homeName": "Espanha",
+      "awayName": "Áustria",
       "source": "manual"
     }
   }
