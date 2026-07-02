@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-02T09:55:02.160Z",
+  "updatedAt": "2026-07-02T20:52:04.356Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -576,6 +576,15 @@
       "checkedAt": "2026-07-02T09:55:02.160Z",
       "homeName": "Estados Unidos",
       "awayName": "Bósnia"
+    },
+    "R32-7": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 3,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-02T20:52:04.356Z",
+      "homeName": "Espanha",
+      "awayName": "Áustria"
     }
   }
 }
