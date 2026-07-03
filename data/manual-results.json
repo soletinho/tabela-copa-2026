@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-03T09:10:58.216Z",
+  "updatedAt": "2026-07-03T09:11:21.528Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -594,6 +594,15 @@
       "checkedAt": "2026-07-03T09:10:58.216Z",
       "homeName": "Portugal",
       "awayName": "Croácia"
+    },
+    "R32-13": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-03T09:11:21.528Z",
+      "homeName": "Suíça",
+      "awayName": "Argélia"
     }
   }
 }
