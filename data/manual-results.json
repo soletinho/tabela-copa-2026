@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-03T09:12:45.105Z",
+  "updatedAt": "2026-07-03T20:53:21.534Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -612,6 +612,17 @@
       "checkedAt": "2026-07-03T09:12:45.105Z",
       "homeName": "França",
       "awayName": "Suécia"
+    },
+    "R32-15": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 1,
+      "checkedAt": "2026-07-03T20:53:21.534Z",
+      "homeName": "Austrália",
+      "awayName": "Egito",
+      "homePenGoals": 4,
+      "awayPenGoals": 1
     }
   }
 }
