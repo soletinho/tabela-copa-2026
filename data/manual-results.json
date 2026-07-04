@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-04T00:45:14.084Z",
+  "updatedAt": "2026-07-04T10:11:03.268Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -632,6 +632,15 @@
       "checkedAt": "2026-07-04T00:45:14.084Z",
       "homeName": "Argentina",
       "awayName": "Cabo Verde"
+    },
+    "R32-14": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 1,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-04T10:11:03.268Z",
+      "homeName": "Colômbia",
+      "awayName": "Gana"
     }
   }
 }
