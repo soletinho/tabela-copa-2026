@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-07-04T10:11:03.268Z",
+  "updatedAt": "2026-07-04T19:04:44.363Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -742,6 +742,16 @@
       "checkedAt": "2026-07-04T10:11:03.268Z",
       "homeName": "Colômbia",
       "awayName": "Gana",
+      "source": "manual"
+    },
+    "R16-1": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 0,
+      "awayGoals": 3,
+      "checkedAt": "2026-07-04T19:04:44.363Z",
+      "homeName": "Canadá",
+      "awayName": "Marrocos",
       "source": "manual"
     }
   }
