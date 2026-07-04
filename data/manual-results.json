@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-04T19:04:44.363Z",
+  "updatedAt": "2026-07-04T23:08:04.954Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -650,6 +650,15 @@
       "checkedAt": "2026-07-04T19:04:44.363Z",
       "homeName": "Canadá",
       "awayName": "Marrocos"
+    },
+    "R16-2": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 0,
+      "awayGoals": 1,
+      "checkedAt": "2026-07-04T23:08:04.954Z",
+      "homeName": "Paraguai",
+      "awayName": "França"
     }
   }
 }
