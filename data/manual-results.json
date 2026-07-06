@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-06T08:53:40.103Z",
+  "updatedAt": "2026-07-06T21:07:45.059Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -677,6 +677,15 @@
       "checkedAt": "2026-07-06T08:53:40.103Z",
       "homeName": "México",
       "awayName": "Inglaterra"
+    },
+    "R16-4": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 0,
+      "awayGoals": 1,
+      "checkedAt": "2026-07-06T21:07:45.059Z",
+      "homeName": "Portugal",
+      "awayName": "Espanha"
     }
   }
 }
