@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-07-06T21:07:45.059Z",
+  "updatedAt": "2026-07-07T01:59:28.079Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -792,6 +792,16 @@
       "checkedAt": "2026-07-06T21:07:45.059Z",
       "homeName": "Portugal",
       "awayName": "Espanha",
+      "source": "manual"
+    },
+    "R16-3": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 1,
+      "awayGoals": 4,
+      "checkedAt": "2026-07-07T01:59:28.079Z",
+      "homeName": "Estados Unidos",
+      "awayName": "Bélgica",
       "source": "manual"
     }
   }
