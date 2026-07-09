@@ -701,6 +701,8 @@
       "final": true,
       "homeGoals": 0,
       "awayGoals": 0,
+      "homePenGoals": 4,
+      "awayPenGoals": 3,
       "checkedAt": "2026-07-08T00:00:00.000Z",
       "homeName": "Suíça",
       "awayName": "Colômbia"
