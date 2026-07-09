@@ -1,6 +1,6 @@
 {
   "source": "manual",
-  "updatedAt": "2026-07-09T22:01:58.390Z",
+  "updatedAt": "2026-07-09T22:15:00.000Z",
   "matches": {
     "A-1": {
       "status": "FT",
@@ -699,20 +699,29 @@
     "R16-7": {
       "status": "FT",
       "final": true,
-      "homeGoals": 3,
-      "awayGoals": 2,
-      "checkedAt": "2026-07-07T18:06:27.871Z",
-      "homeName": "Argentina",
-      "awayName": "Egito"
+      "homeGoals": 0,
+      "awayGoals": 0,
+      "checkedAt": "2026-07-08T00:00:00.000Z",
+      "homeName": "Suíça",
+      "awayName": "Colômbia"
+    },
+    "R16-8": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 3,
+      "checkedAt": "2026-07-07T22:00:00.000Z",
+      "homeName": "Egito",
+      "awayName": "Argentina"
     },
     "QF-1": {
       "status": "FT",
       "final": true,
-      "homeGoals": 2,
-      "awayGoals": 0,
+      "homeGoals": 0,
+      "awayGoals": 2,
       "checkedAt": "2026-07-09T22:01:58.390Z",
-      "homeName": "França",
-      "awayName": "Marrocos"
+      "homeName": "Marrocos",
+      "awayName": "França"
     }
   }
 }
