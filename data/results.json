@@ -1,6 +1,6 @@
 {
   "source": "api-football",
-  "updatedAt": "2026-07-09T22:01:58.390Z",
+  "updatedAt": "2026-07-10T21:09:05.890Z",
   "matches": {
     "B-1": {
       "apiFixtureId": 1539000,
@@ -822,6 +822,16 @@
       "checkedAt": "2026-07-09T22:01:58.390Z",
       "homeName": "França",
       "awayName": "Marrocos",
+      "source": "manual"
+    },
+    "QF-2": {
+      "status": "FT",
+      "final": true,
+      "homeGoals": 2,
+      "awayGoals": 1,
+      "checkedAt": "2026-07-10T21:09:05.890Z",
+      "homeName": "Espanha",
+      "awayName": "Bélgica",
       "source": "manual"
     }
   }
